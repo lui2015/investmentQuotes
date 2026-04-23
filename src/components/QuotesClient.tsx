@@ -11,18 +11,12 @@ export function QuotesClient({ initialQuotes, tags }: { initialQuotes: Quote[]; 
   const [searching, setSearching] = useState(false);
 
   const doSearch = useCallback(async (keyword: string) => {
-    if (!keyword.trim()) {
-      setQuotes(initialQuotes);
-      return;
-    }
+    if (!keyword.trim()) { setQuotes(initialQuotes); return; }
     setSearching(true);
     try {
       const res = await fetch(`/api/search?q=${encodeURIComponent(keyword)}`);
-      const data = await res.json();
-      setQuotes(data);
-    } finally {
-      setSearching(false);
-    }
+      setQuotes(await res.json());
+    } finally { setSearching(false); }
   }, [initialQuotes]);
 
   useEffect(() => {
@@ -30,13 +24,10 @@ export function QuotesClient({ initialQuotes, tags }: { initialQuotes: Quote[]; 
     return () => clearTimeout(timer);
   }, [search, doSearch]);
 
-  const filtered = selectedTag
-    ? quotes.filter((q) => q.tags?.some((t) => t.id === selectedTag))
-    : quotes;
+  const filtered = selectedTag ? quotes.filter((q) => q.tags?.some((t) => t.id === selectedTag)) : quotes;
 
   return (
     <>
-      {/* Search */}
       <div className="mb-8">
         <div className="relative max-w-xl">
           <input
@@ -44,24 +35,32 @@ export function QuotesClient({ initialQuotes, tags }: { initialQuotes: Quote[]; 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="搜索名言、大师姓名…"
-            className="w-full px-5 py-3 pl-12 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-800 dark:text-stone-200 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-shadow"
+            className="w-full px-5 py-3 pl-12 border text-base focus:outline-none focus:ring-2 transition-shadow"
+            style={{
+              background: "var(--t-bg-input)",
+              borderColor: "var(--t-border)",
+              color: "var(--t-text)",
+              borderRadius: "var(--t-radius)",
+              // @ts-expect-error css variable
+              "--tw-ring-color": "var(--t-accent)",
+            }}
           />
-          <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: "var(--t-text-muted)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           {searching && (
             <div className="absolute right-4 top-1/2 -translate-y-1/2">
-              <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--t-accent)", borderTopColor: "transparent" }} />
             </div>
           )}
         </div>
       </div>
 
-      {/* Tag filter */}
       <div className="flex flex-wrap gap-2 mb-8">
         <button
           onClick={() => setSelectedTag(null)}
-          className={`tag-pill ${!selectedTag ? "bg-amber-600 text-white" : "bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-amber-100 dark:hover:bg-amber-900/30"}`}
+          className="tag-pill transition-colors"
+          style={{ background: !selectedTag ? "var(--t-accent)" : "var(--t-bg-tag)", color: !selectedTag ? "#fff" : "var(--t-tag-text)" }}
         >
           全部
         </button>
@@ -69,44 +68,47 @@ export function QuotesClient({ initialQuotes, tags }: { initialQuotes: Quote[]; 
           <button
             key={tag.id}
             onClick={() => setSelectedTag(tag.id === selectedTag ? null : tag.id)}
-            className={`tag-pill ${tag.id === selectedTag ? "bg-amber-600 text-white" : "bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-amber-100 dark:hover:bg-amber-900/30"}`}
+            className="tag-pill transition-colors"
+            style={{
+              background: tag.id === selectedTag ? "var(--t-accent)" : "var(--t-bg-tag)",
+              color: tag.id === selectedTag ? "#fff" : "var(--t-tag-text)",
+            }}
           >
             {tag.name}
           </button>
         ))}
       </div>
 
-      {/* Results */}
-      <p className="text-sm text-stone-400 mb-6">{filtered.length} 条名言</p>
+      <p className="text-sm mb-6" style={{ color: "var(--t-text-muted)" }}>{filtered.length} 条名言</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filtered.map((quote) => (
           <Link key={quote.id} href={`/quotes/${quote.id}`} className="block">
-            <div className="card-hover bg-white dark:bg-stone-900 rounded-2xl p-6 border border-stone-200 dark:border-stone-800 h-full flex flex-col">
+            <div
+              className="card-hover p-6 border h-full flex flex-col transition-colors duration-300"
+              style={{ background: "var(--t-bg-card)", borderColor: "var(--t-border)", borderRadius: "var(--t-radius)" }}
+            >
               <div className="flex-1">
-                <div className="text-amber-500 text-3xl mb-3 leading-none">&ldquo;</div>
-                <p className="quote-text text-stone-800 dark:text-stone-200 text-base leading-relaxed mb-3">
-                  {quote.content_cn}
-                </p>
+                <div className="text-3xl mb-3 leading-none" style={{ color: "var(--t-accent)" }}>&ldquo;</div>
+                <p className="quote-text text-base leading-relaxed mb-3" style={{ color: "var(--t-text)" }}>{quote.content_cn}</p>
                 {quote.content_en && (
-                  <p className="text-stone-400 dark:text-stone-500 text-sm italic leading-relaxed mb-4">
-                    {quote.content_en}
-                  </p>
+                  <p className="text-sm italic leading-relaxed mb-4" style={{ color: "var(--t-text-muted)" }}>{quote.content_en}</p>
                 )}
               </div>
-              <div className="mt-4 pt-4 border-t border-stone-100 dark:border-stone-800">
+              <div className="mt-4 pt-4 border-t" style={{ borderColor: "var(--t-border)" }}>
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white font-bold text-xs shrink-0">
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0"
+                    style={{ background: `linear-gradient(135deg, var(--t-avatar-from), var(--t-avatar-to))` }}
+                  >
                     {quote.master_name_cn?.charAt(0)}
                   </div>
-                  <div className="text-sm font-medium text-stone-700 dark:text-stone-300">
-                    {quote.master_name_cn}
-                  </div>
+                  <div className="text-sm font-medium" style={{ color: "var(--t-text)" }}>{quote.master_name_cn}</div>
                 </div>
                 {quote.tags && quote.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     {quote.tags.map((tag) => (
-                      <span key={tag.id} className="text-xs px-2 py-0.5 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-full">
+                      <span key={tag.id} className="text-xs px-2 py-0.5 rounded-full" style={{ background: "var(--t-bg-tag)", color: "var(--t-tag-text)" }}>
                         {tag.name}
                       </span>
                     ))}
@@ -121,8 +123,8 @@ export function QuotesClient({ initialQuotes, tags }: { initialQuotes: Quote[]; 
       {filtered.length === 0 && (
         <div className="text-center py-16">
           <div className="text-4xl mb-4">🔍</div>
-          <p className="text-stone-500 dark:text-stone-400 text-lg">没有找到匹配的名言</p>
-          <p className="text-stone-400 text-sm mt-2">试试换个关键词</p>
+          <p className="text-lg" style={{ color: "var(--t-text-secondary)" }}>没有找到匹配的名言</p>
+          <p className="text-sm mt-2" style={{ color: "var(--t-text-muted)" }}>试试换个关键词</p>
         </div>
       )}
     </>

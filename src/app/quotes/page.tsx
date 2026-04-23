@@ -16,14 +16,9 @@ export default function QuotesPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-stone-800 dark:text-stone-200 mb-4">
-          名言库
-        </h1>
-        <p className="text-stone-500 dark:text-stone-400 text-lg">
-          全部投资名言，支持搜索和标签筛选
-        </p>
+        <h1 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: "var(--t-text)" }}>名言库</h1>
+        <p className="text-lg" style={{ color: "var(--t-text-secondary)" }}>全部投资名言，支持搜索和标签筛选</p>
       </div>
-
       <QuotesClient initialQuotes={quotes} tags={tags} />
     </div>
   );

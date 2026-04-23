@@ -17,11 +17,16 @@ export function CopyButton({ quote }: { quote: Quote }) {
   return (
     <button
       onClick={handleCopy}
-      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-sm font-medium transition-colors"
+      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all hover:scale-105"
+      style={{
+        background: "var(--t-bg-tag)",
+        color: "var(--t-text)",
+        borderRadius: "var(--t-radius)",
+      }}
     >
       {copied ? (
         <>
-          <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" style={{ color: "var(--t-accent)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
           已复制
