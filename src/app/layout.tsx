@@ -15,11 +15,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="zh-CN" data-theme="classic" suppressHydrationWarning>
+    <html lang="zh-CN" data-theme="cyberpunk" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{const t=localStorage.getItem('iq-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}`,
+            __html: `try{const t=localStorage.getItem('iq-theme');document.documentElement.setAttribute('data-theme',t||'cyberpunk')}catch(e){}`,
           }}
         />
       </head>

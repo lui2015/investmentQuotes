@@ -60,7 +60,7 @@ export function QuotesClient({ initialQuotes, tags }: { initialQuotes: Quote[]; 
         <button
           onClick={() => setSelectedTag(null)}
           className="tag-pill transition-colors"
-          style={{ background: !selectedTag ? "var(--t-accent)" : "var(--t-bg-tag)", color: !selectedTag ? "#fff" : "var(--t-tag-text)" }}
+          style={{ background: !selectedTag ? "var(--t-accent)" : "var(--t-bg-tag)", color: !selectedTag ? "var(--t-bg)" : "var(--t-tag-text)" }}
         >
           全部
         </button>
@@ -71,7 +71,7 @@ export function QuotesClient({ initialQuotes, tags }: { initialQuotes: Quote[]; 
             className="tag-pill transition-colors"
             style={{
               background: tag.id === selectedTag ? "var(--t-accent)" : "var(--t-bg-tag)",
-              color: tag.id === selectedTag ? "#fff" : "var(--t-tag-text)",
+              color: tag.id === selectedTag ? "var(--t-bg)" : "var(--t-tag-text)",
             }}
           >
             {tag.name}

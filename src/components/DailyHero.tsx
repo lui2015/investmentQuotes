@@ -165,9 +165,10 @@ export function DailyHero({ initialQuote }: { initialQuote: QuoteData }) {
         </button>
         <Link
           href={`/quotes/${displayed.id}`}
-          className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 shadow-lg hover:scale-105 active:scale-95"
+          className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold transition-all duration-300 shadow-lg hover:scale-105 active:scale-95"
           style={{
             background: "var(--t-accent)",
+            color: "var(--t-bg)",
             borderRadius: "var(--t-radius)",
           }}
         >

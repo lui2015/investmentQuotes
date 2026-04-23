@@ -42,7 +42,7 @@ export default async function TopicDetailPage({ params }: { params: Params }) {
               className="tag-pill transition-colors"
               style={{
                 background: t.id === tag.id ? "var(--t-accent)" : "var(--t-bg-tag)",
-                color: t.id === tag.id ? "#fff" : "var(--t-tag-text)",
+                color: t.id === tag.id ? "var(--t-bg)" : "var(--t-tag-text)",
               }}
             >
               {t.name}

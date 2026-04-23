@@ -88,8 +88,8 @@ export default function HomePage() {
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               href="/masters"
-              className="px-6 py-3 font-medium text-white transition-all hover:scale-105"
-              style={{ background: "var(--t-accent)", borderRadius: "var(--t-radius)" }}
+              className="px-6 py-3 font-bold transition-all hover:scale-105"
+              style={{ background: "var(--t-accent)", color: "var(--t-bg)", borderRadius: "var(--t-radius)" }}
             >
               浏览投资大师
             </Link>

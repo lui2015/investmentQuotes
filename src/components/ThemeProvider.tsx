@@ -12,13 +12,15 @@ export const THEMES = [
 
 export type ThemeId = (typeof THEMES)[number]["id"];
 
+const DEFAULT_THEME: ThemeId = "cyberpunk";
+
 const ThemeContext = createContext<{
   theme: ThemeId;
   setTheme: (t: ThemeId) => void;
-}>({ theme: "classic", setTheme: () => {} });
+}>({ theme: DEFAULT_THEME, setTheme: () => {} });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeId>("classic");
+  const [theme, setThemeState] = useState<ThemeId>(DEFAULT_THEME);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -26,6 +28,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (saved && THEMES.some((t) => t.id === saved)) {
       setThemeState(saved);
       document.documentElement.setAttribute("data-theme", saved);
+    } else {
+      document.documentElement.setAttribute("data-theme", DEFAULT_THEME);
     }
     setMounted(true);
   }, []);

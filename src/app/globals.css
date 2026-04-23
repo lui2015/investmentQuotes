@@ -5,8 +5,43 @@
    Switch themes via data-theme attribute on <html>
    ============================================================ */
 
-/* ---------- Classic Gold (default) ---------- */
+/* ---------- Cyberpunk (default) ---------- */
 :root,
+[data-theme="cyberpunk"] {
+  --t-bg: #08080e;
+  --t-bg-card: #111119;
+  --t-bg-nav: rgba(8,8,14,0.88);
+  --t-bg-footer: #0c0c14;
+  --t-bg-tag: rgba(0,255,255,0.1);
+  --t-bg-tag-hover: rgba(0,255,255,0.18);
+  --t-bg-input: #16162a;
+  --t-border: #252545;
+  --t-text: #eeeeff;
+  --t-text-secondary: #b0b0cc;
+  --t-text-muted: #7878a0;
+  --t-accent: #00ffff;
+  --t-accent-hover: #00dddd;
+  --t-accent-light: #80ffff;
+  --t-accent-bg: rgba(0,255,255,0.08);
+  --t-accent-text: #00ffff;
+  --t-tag-text: #66ffff;
+  --t-hero-from: #080020;
+  --t-hero-via: #140038;
+  --t-hero-to: #200055;
+  --t-hero-text: #f0f0ff;
+  --t-hero-sub: rgba(100,255,255,0.7);
+  --t-avatar-from: #ff00ff;
+  --t-avatar-to: #00ffff;
+  --t-glow: rgba(0,255,255,0.4);
+  --t-selection-bg: #ff00ff;
+  --t-selection-text: #ffffff;
+  --t-card-shadow: rgba(0,255,255,0.1);
+  --t-font-quote: var(--font-geist-mono), "Courier New", monospace;
+  --t-radius: 0.25rem;
+  --t-particle: rgba(255,0,255,0.3);
+}
+
+/* ---------- Classic Gold ---------- */
 [data-theme="classic"] {
   --t-bg: #fafaf9;
   --t-bg-card: #ffffff;
@@ -39,41 +74,6 @@
   --t-font-quote: "Noto Serif SC", Georgia, serif;
   --t-radius: 1rem;
   --t-particle: rgba(251,191,36,0.2);
-}
-
-/* ---------- Cyberpunk ---------- */
-[data-theme="cyberpunk"] {
-  --t-bg: #0a0a0f;
-  --t-bg-card: #12121a;
-  --t-bg-nav: rgba(10,10,15,0.85);
-  --t-bg-footer: #0e0e14;
-  --t-bg-tag: rgba(0,255,255,0.08);
-  --t-bg-tag-hover: rgba(0,255,255,0.15);
-  --t-bg-input: #1a1a2e;
-  --t-border: #1e1e3a;
-  --t-text: #e0e0ff;
-  --t-text-secondary: #8888aa;
-  --t-text-muted: #555577;
-  --t-accent: #00ffff;
-  --t-accent-hover: #00cccc;
-  --t-accent-light: #66ffff;
-  --t-accent-bg: rgba(0,255,255,0.06);
-  --t-accent-text: #00ffff;
-  --t-tag-text: #00ffff;
-  --t-hero-from: #0a0020;
-  --t-hero-via: #1a0040;
-  --t-hero-to: #2a0060;
-  --t-hero-text: #e0e0ff;
-  --t-hero-sub: rgba(0,255,255,0.5);
-  --t-avatar-from: #ff00ff;
-  --t-avatar-to: #00ffff;
-  --t-glow: rgba(0,255,255,0.4);
-  --t-selection-bg: #ff00ff;
-  --t-selection-text: #000000;
-  --t-card-shadow: rgba(0,255,255,0.08);
-  --t-font-quote: "Courier New", "Geist Mono", monospace;
-  --t-radius: 0.25rem;
-  --t-particle: rgba(255,0,255,0.3);
 }
 
 /* ---------- Ink (水墨) ---------- */
@@ -224,16 +224,34 @@ body {
     0deg,
     transparent,
     transparent 2px,
-    rgba(0,255,255,0.015) 2px,
-    rgba(0,255,255,0.015) 4px
+    rgba(0,255,255,0.02) 2px,
+    rgba(0,255,255,0.02) 4px
   );
   pointer-events: none;
 }
 
-/* Cyberpunk card neon border */
+/* Cyberpunk card neon glow on hover */
+[data-theme="cyberpunk"] .card-hover {
+  border: 1px solid #252545;
+}
 [data-theme="cyberpunk"] .card-hover:hover {
-  box-shadow: 0 0 20px rgba(0,255,255,0.15), 0 0 40px rgba(255,0,255,0.08);
-  border-color: rgba(0,255,255,0.3);
+  box-shadow: 0 0 15px rgba(0,255,255,0.2), 0 0 30px rgba(255,0,255,0.08), inset 0 0 15px rgba(0,255,255,0.03);
+  border-color: rgba(0,255,255,0.4) !important;
+}
+
+/* Cyberpunk tag pills: brighter text & subtle border */
+[data-theme="cyberpunk"] .tag-pill {
+  border: 1px solid rgba(0,255,255,0.15);
+}
+
+/* Cyberpunk nav bottom glow line */
+[data-theme="cyberpunk"] nav {
+  border-image: linear-gradient(90deg, transparent, rgba(0,255,255,0.4), rgba(255,0,255,0.3), transparent) 1;
+}
+
+/* Cyberpunk footer top glow line */
+[data-theme="cyberpunk"] footer {
+  border-image: linear-gradient(90deg, transparent, rgba(255,0,255,0.3), rgba(0,255,255,0.4), transparent) 1;
 }
 
 /* Ink brush texture hint */
