@@ -1,36 +1,313 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💎 投资名言（InvestmentQuotes）
 
-## Getting Started
+> 让大师思想照亮普通人的投资道路
 
-First, run the development server:
+一个精美的投资名言聚合网站，汇聚巴菲特、芒格、格雷厄姆等全球投资大师的经典名言，支持按大师和投资思路分类浏览，每日推荐一句智慧箴言。
+
+## 快速启动
 
 ```bash
+# 安装依赖
+npm install
+
+# 启动开发服务器
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+打开 [http://localhost:3000](http://localhost:3000) 即可访问。数据库会在首次启动时自动创建并填充种子数据。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 技术栈
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| 层级 | 技术方案 |
+|-----|---------|
+| 框架 | Next.js 16 (App Router, Turbopack) |
+| 语言 | TypeScript |
+| 样式 | Tailwind CSS 4 |
+| 数据库 | SQLite (better-sqlite3) |
+| 部署 | Vercel / Node.js 服务器 |
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+# 产品需求文档 (PRD)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 一、项目概述
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 1.1 项目背景
 
-## Deploy on Vercel
+投资是一场漫长的修行，巴菲特、芒格、格雷厄姆、彼得·林奇等投资大师用数十年实践凝练出的智慧，往往浓缩在一句话中。然而这些名言散落在各类书籍、演讲和访谈里，普通投资者难以系统获取。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**投资名言** 旨在打造一个精美、易用的名言聚合网站，让用户随时汲取大师智慧，在投资路上少走弯路。
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 1.2 目标用户
+
+| 用户群体 | 特征 |
+|---------|------|
+| 投资新手 | 刚入市，需要建立正确的投资理念 |
+| 个人投资者 | 有一定经验，希望系统性学习大师思想 |
+| 理财博主/自媒体 | 需要高质量的投资金句作为内容素材 |
+| 金融从业者 | 日常分享、培训中引用大师名言 |
+
+### 1.3 项目目标
+
+- 收录 **50+ 位投资大师**、**500+ 条精选名言**（初期）
+- 提供多维度分类浏览与搜索能力
+- 首页每日推荐，培养用户访问习惯
+- 移动端优先，响应式设计
+
+---
+
+## 二、核心功能需求
+
+### 2.1 首页 — 每日推荐
+
+| 功能项 | 说明 |
+|-------|------|
+| 每日一言 | 每天零点自动更换一条精选名言，配大师头像、出处，展示在首页最醒目位置 |
+| 名言卡片 | 精美卡片式展示，支持一键复制文本、分享图片（生成带名言的精美海报） |
+| 历史回顾 | 可查看过去 30 天的「每日一言」记录 |
+| 随机发现 | 点击「换一条」按钮随机展示一条名言，带酷炫逐字浮现动画 |
+| 推荐列表 | 首页下方展示「编辑精选」「热门名言」「最新收录」三个推荐模块 |
+
+### 2.2 名言库 — 多维度分类浏览
+
+#### 2.2.1 按投资大师分类
+
+| 功能项 | 说明 |
+|-------|------|
+| 大师列表页 | 以卡片网格展示所有大师，包含头像、姓名、简介标签（如"价值投资之父"） |
+| 大师详情页 | 展示大师简介（生平、投资理念概述、代表著作）及其名下所有名言 |
+| 大师搜索 | 支持按姓名（中/英文）模糊搜索 |
+
+**初期收录的大师（不限于）：**
+
+| 分类 | 代表人物 |
+|-----|---------|
+| 价值投资 | 本杰明·格雷厄姆、沃伦·巴菲特、查理·芒格、塞斯·卡拉曼 |
+| 成长投资 | 彼得·林奇、菲利普·费雪、威廉·欧奈尔 |
+| 指数/被动投资 | 约翰·博格、伯顿·马尔基尔 |
+| 宏观/对冲 | 乔治·索罗斯、瑞·达利欧、霍华德·马克斯 |
+| 交易/技术 | 杰西·利弗莫尔、纳西姆·塔勒布 |
+| 中国投资人 | 段永平、李录、张磊 |
+
+#### 2.2.2 按投资思路/主题分类
+
+| 主题标签 | 说明 | 示例名言 |
+|---------|------|---------|
+| 价值投资 | 关于内在价值、安全边际 | "价格是你付出的，价值是你得到的" — 巴菲特 |
+| 长期主义 | 关于耐心、复利、时间的力量 | "我们最喜欢的持有期是永远" — 巴菲特 |
+| 风险管理 | 关于风控、止损、分散 | "投资的第一条规则是不要亏钱" — 巴菲特 |
+| 逆向思维 | 关于独立思考、反人性 | "别人贪婪时我恐惧" — 巴菲特 |
+| 能力圈 | 关于认知边界、专注 | "知道自己不知道什么比聪明更重要" — 芒格 |
+| 市场认知 | 关于市场本质、周期 | "市场短期是投票机，长期是称重机" — 格雷厄姆 |
+| 心态修炼 | 关于情绪控制、纪律 | "投资中最重要的是气质，而非智力" — 巴菲特 |
+| 学习成长 | 关于阅读、思维模型 | "我这辈子遇到的聪明人没有不阅读的" — 芒格 |
+| 企业分析 | 关于护城河、商业模式 | "以合理的价格买入伟大的公司" — 巴菲特 |
+| 人生哲学 | 大师关于人生、财富的感悟 | "走到生命尽头时，衡量的不是你赚了多少钱" — 巴菲特 |
+
+#### 2.2.3 浏览与筛选
+
+| 功能项 | 说明 |
+|-------|------|
+| 标签筛选 | 支持同时选择多个主题标签进行交叉筛选 |
+| 排序方式 | 最新收录 / 最多收藏 / 随机排列 |
+| 搜索 | 全文搜索名言内容、大师姓名 |
+
+### 2.3 名言详情
+
+| 功能项 | 说明 |
+|-------|------|
+| 名言展示 | 中英双语展示（如有英文原文） |
+| 出处标注 | 标注出自哪本书/演讲/股东信/访谈 |
+| 大师链接 | 点击大师名字跳转大师详情页 |
+| 相关名言 | 底部推荐同主题或同大师的其他名言 |
+| 分享功能 | 一键复制文本 / 分享链接 |
+| 收藏功能 | 登录用户可收藏名言到个人收藏夹（后期） |
+
+---
+
+## 三、用户体系（轻量级，后期规划）
+
+| 功能项 | 说明 |
+|-------|------|
+| 登录方式 | 微信扫码登录（主要）、邮箱注册登录 |
+| 个人收藏 | 收藏的名言列表，支持按标签筛选 |
+| 浏览历史 | 最近浏览过的名言记录 |
+| 每日提醒 | 可订阅「每日一言」推送（邮件/微信服务号） |
+
+---
+
+## 四、页面结构
+
+```
+首页
+├── 每日一言（Hero 区域，含酷炫逐字动画）
+├── 主题标签快捷入口
+├── 编辑精选
+├── 热门名言
+└── 最新收录
+
+名言库 /quotes
+├── 全文搜索
+├── 主题标签筛选
+└── 名言卡片列表
+
+投资大师 /masters
+├── 按投资风格分组展示
+└── 大师卡片（头像、简介、名言数）
+
+大师详情 /masters/[id]
+├── 大师生平简介
+└── 名下所有名言
+
+主题分类 /topics
+└── 主题卡片（图标、描述、名言数）
+
+主题详情 /topics/[slug]
+├── 标签切换
+└── 该主题下所有名言
+
+名言详情 /quotes/[id]
+├── 名言内容（中英双语）
+├── 大师信息 & 出处
+├── 一键复制
+└── 相关推荐
+```
+
+---
+
+## 五、非功能需求
+
+### 5.1 性能
+
+| 指标 | 要求 |
+|-----|------|
+| 首屏加载 | ≤ 1.5s（国内 CDN 加速） |
+| 搜索响应 | ≤ 300ms |
+| 并发支持 | ≥ 1000 QPS |
+
+### 5.2 SEO
+
+- 服务端渲染（SSR）/ 动态路由，确保搜索引擎收录
+- 每条名言有独立 URL
+- 自动生成 sitemap
+
+### 5.3 响应式设计
+
+- 移动端优先设计，适配手机、平板、桌面端
+- 暗色模式支持
+
+### 5.4 内容管理（后期规划）
+
+- 后台管理系统，支持名言/大师信息的增删改查
+- 支持批量导入（Excel/CSV）
+- 名言审核流程（草稿 → 审核 → 发布）
+
+---
+
+## 六、数据模型
+
+### 6.1 大师表 `masters`
+
+| 字段 | 类型 | 说明 |
+|-----|------|------|
+| id | TEXT | 主键 |
+| name_cn | TEXT | 中文名 |
+| name_en | TEXT | 英文名 |
+| avatar_url | TEXT | 头像 URL |
+| title | TEXT | 称号（如"价值投资之父"） |
+| bio | TEXT | 简介 |
+| born_year | INT | 出生年份 |
+| nationality | TEXT | 国籍 |
+| category | TEXT | 投资风格分类 |
+| created_at | TEXT | 创建时间 |
+
+### 6.2 名言表 `quotes`
+
+| 字段 | 类型 | 说明 |
+|-----|------|------|
+| id | TEXT | 主键 |
+| content_cn | TEXT | 中文内容 |
+| content_en | TEXT | 英文原文（可空） |
+| master_id | TEXT | 关联大师 |
+| source | TEXT | 出处（书名/演讲名） |
+| source_year | INT | 出处年份 |
+| is_featured | INT | 是否编辑精选 |
+| favorite_count | INT | 收藏数 |
+| created_at | TEXT | 创建时间 |
+
+### 6.3 标签表 `tags`
+
+| 字段 | 类型 | 说明 |
+|-----|------|------|
+| id | TEXT | 主键 |
+| name | TEXT | 标签名（如"价值投资"） |
+| slug | TEXT | URL 友好标识 |
+| description | TEXT | 标签描述 |
+
+### 6.4 名言-标签关联表 `quote_tags`
+
+| 字段 | 类型 | 说明 |
+|-----|------|------|
+| quote_id | TEXT | 名言 ID |
+| tag_id | TEXT | 标签 ID |
+
+### 6.5 每日推荐表 `daily_quotes`
+
+| 字段 | 类型 | 说明 |
+|-----|------|------|
+| id | TEXT | 主键 |
+| quote_id | TEXT | 关联名言 |
+| display_date | TEXT | 展示日期（唯一） |
+| created_at | TEXT | 创建时间 |
+
+---
+
+## 七、里程碑规划
+
+| 阶段 | 周期 | 目标 |
+|-----|------|------|
+| **P0 — MVP** ✅ | 2 周 | 首页每日推荐 + 名言库浏览（按大师/主题） + 搜索 + 名言详情 + 复制分享 |
+| **P1 — 用户** | 1 周 | 用户登录 + 收藏功能 + 浏览历史 |
+| **P2 — 运营** | 1 周 | 后台管理系统 + 批量导入 + 每日推荐管理 |
+| **P3 — 增长** | 2 周 | 分享海报生成 + 每日推送订阅 + 暗色模式 + SEO 优化 |
+
+---
+
+## 八、内容运营策略
+
+1. **种子数据**：首批录入 12 位核心大师，每位 3-12 条名言，共 50+ 条
+2. **每日更新**：运营团队每日审核并发布「每日一言」
+3. **用户贡献**：后期开放用户投稿名言功能（需审核）
+4. **社交传播**：鼓励用户通过精美海报分享到社交平台
+
+---
+
+## 项目结构
+
+```
+src/
+├── app/                    # Next.js App Router 页面
+│   ├── page.tsx           # 首页（每日推荐 + 精选 + 热门 + 最新）
+│   ├── quotes/            # 名言库 & 名言详情
+│   ├── masters/           # 大师列表 & 大师详情
+│   ├── topics/            # 主题分类 & 主题详情
+│   └── api/               # API 路由（随机名言、搜索）
+├── components/            # React 组件
+│   ├── DailyHero.tsx     # 每日一言 Hero（含逐字动画）
+│   ├── QuoteCard.tsx     # 名言卡片
+│   ├── QuotesClient.tsx  # 名言库客户端（搜索 + 筛选）
+│   ├── CopyButton.tsx    # 一键复制
+│   ├── Navbar.tsx        # 导航栏
+│   └── Footer.tsx        # 页脚
+├── lib/                   # 数据层
+│   ├── db.ts             # SQLite 数据库连接 & 建表
+│   ├── queries.ts        # 数据查询接口
+│   ├── seed.ts           # 种子数据（12 位大师 50+ 条名言）
+│   └── uuid.ts           # ID 生成工具
+data/
+└── quotes.db             # SQLite 数据库文件（自动生成）
+```
+
+---
+
+*文档版本：v1.0 | 创建日期：2026-04-23*
