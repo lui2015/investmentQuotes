@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import type { Quote, Tag } from "@/lib/queries";
+import { withBasePath } from "@/lib/basePath";
 
 export function QuotesClient({ initialQuotes, tags }: { initialQuotes: Quote[]; tags: Tag[] }) {
   const [quotes, setQuotes] = useState(initialQuotes);
@@ -14,7 +15,7 @@ export function QuotesClient({ initialQuotes, tags }: { initialQuotes: Quote[]; 
     if (!keyword.trim()) { setQuotes(initialQuotes); return; }
     setSearching(true);
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(keyword)}`);
+      const res = await fetch(withBasePath(`/api/search?q=${encodeURIComponent(keyword)}`));
       setQuotes(await res.json());
     } finally { setSearching(false); }
   }, [initialQuotes]);

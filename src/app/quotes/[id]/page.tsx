@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getQuoteById, getRelatedQuotes } from "@/lib/queries";
+import { getInterpretation } from "@/lib/interpretations";
 import { CopyButton } from "@/components/CopyButton";
 import { QuoteCard } from "@/components/QuoteCard";
 import type { Metadata } from "next";
@@ -23,6 +24,7 @@ export default async function QuoteDetailPage({ params }: { params: Params }) {
   const quote = getQuoteById(id);
   if (!quote) notFound();
   const related = getRelatedQuotes(quote.id, 4);
+  const interp = getInterpretation(quote);
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -94,6 +96,168 @@ export default async function QuoteDetailPage({ params }: { params: Params }) {
           </div>
         )}
       </article>
+
+      {/* —— 深度解读板块 —— */}
+      <section className="space-y-6 mb-10">
+        {/* 1. 核心解读 */}
+        <div
+          className="p-6 md:p-8 border transition-colors duration-300"
+          style={{
+            background: "var(--t-bg-card)",
+            borderColor: "var(--t-border)",
+            borderRadius: "calc(var(--t-radius) * 1.5)",
+          }}
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <span
+              className="w-9 h-9 rounded-full flex items-center justify-center text-lg"
+              style={{ background: "var(--t-accent-bg)", color: "var(--t-accent)" }}
+              aria-hidden
+            >
+              🧭
+            </span>
+            <h2 className="text-xl font-bold" style={{ color: "var(--t-text)" }}>
+              核心解读
+            </h2>
+            <span
+              className="text-xs px-2 py-0.5 rounded-full"
+              style={{ background: "var(--t-accent-bg)", color: "var(--t-accent-text)" }}
+            >
+              这句话到底在讲什么
+            </span>
+          </div>
+          <p
+            className="leading-loose text-base md:text-lg"
+            style={{ color: "var(--t-text-secondary)" }}
+          >
+            {interp.core}
+          </p>
+        </div>
+
+        {/* 2. 应用实操 */}
+        <div
+          className="p-6 md:p-8 border transition-colors duration-300"
+          style={{
+            background: "var(--t-bg-card)",
+            borderColor: "var(--t-border)",
+            borderRadius: "calc(var(--t-radius) * 1.5)",
+          }}
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <span
+              className="w-9 h-9 rounded-full flex items-center justify-center text-lg"
+              style={{ background: "var(--t-accent-bg)", color: "var(--t-accent)" }}
+              aria-hidden
+            >
+              🛠
+            </span>
+            <h2 className="text-xl font-bold" style={{ color: "var(--t-text)" }}>
+              应用实操
+            </h2>
+            <span
+              className="text-xs px-2 py-0.5 rounded-full"
+              style={{ background: "var(--t-accent-bg)", color: "var(--t-accent-text)" }}
+            >
+              落地到你的投资
+            </span>
+          </div>
+          <ul className="space-y-3">
+            {interp.practice.map((item, i) => (
+              <li key={i} className="flex gap-3 leading-relaxed">
+                <span
+                  className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mt-0.5"
+                  style={{
+                    background: "var(--t-accent)",
+                    color: "var(--t-bg-card)",
+                  }}
+                  aria-hidden
+                >
+                  {i + 1}
+                </span>
+                <span style={{ color: "var(--t-text-secondary)" }}>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* 3. 生动案例 */}
+        <div
+          className="p-6 md:p-8 border transition-colors duration-300"
+          style={{
+            background: "var(--t-bg-card)",
+            borderColor: "var(--t-border)",
+            borderRadius: "calc(var(--t-radius) * 1.5)",
+          }}
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <span
+              className="w-9 h-9 rounded-full flex items-center justify-center text-lg"
+              style={{ background: "var(--t-accent-bg)", color: "var(--t-accent)" }}
+              aria-hidden
+            >
+              📚
+            </span>
+            <h2 className="text-xl font-bold" style={{ color: "var(--t-text)" }}>
+              生动案例
+            </h2>
+            <span
+              className="text-xs px-2 py-0.5 rounded-full"
+              style={{ background: "var(--t-accent-bg)", color: "var(--t-accent-text)" }}
+            >
+              真实故事里的这句话
+            </span>
+          </div>
+          <p
+            className="leading-loose text-base md:text-lg pl-4 border-l-2"
+            style={{
+              color: "var(--t-text-secondary)",
+              borderColor: "var(--t-accent)",
+            }}
+          >
+            {interp.story}
+          </p>
+        </div>
+
+        {/* 4. 大师视角（可选） */}
+        {interp.masterView && (
+          <div
+            className="p-6 md:p-8 border transition-colors duration-300"
+            style={{
+              background: "var(--t-bg-card)",
+              borderColor: "var(--t-border)",
+              borderRadius: "calc(var(--t-radius) * 1.5)",
+            }}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <span
+                className="w-9 h-9 rounded-full flex items-center justify-center text-lg"
+                style={{ background: "var(--t-accent-bg)", color: "var(--t-accent)" }}
+                aria-hidden
+              >
+                💭
+              </span>
+              <h2 className="text-xl font-bold" style={{ color: "var(--t-text)" }}>
+                {quote.master_name_cn} 的视角
+              </h2>
+            </div>
+            <p
+              className="leading-relaxed italic"
+              style={{ color: "var(--t-text-muted)" }}
+            >
+              {interp.masterView}
+            </p>
+            <div className="mt-4">
+              <Link
+                href={`/masters/${quote.master_id}`}
+                className="text-sm inline-flex items-center gap-1 transition-colors"
+                style={{ color: "var(--t-accent)" }}
+              >
+                了解 {quote.master_name_cn} 的更多思想 →
+              </Link>
+            </div>
+          </div>
+        )}
+      </section>
 
       {related.length > 0 && (
         <section>

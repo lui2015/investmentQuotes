@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
+import { withBasePath } from "@/lib/basePath";
 
 interface QuoteData {
   id: string;
@@ -25,7 +26,7 @@ export function DailyHero({ initialQuote }: { initialQuote: QuoteData }) {
     if (busyRef.current) return;
     busyRef.current = true;
 
-    const res = await fetch("/api/random");
+    const res = await fetch(withBasePath("/api/random"));
     const data = await res.json();
     if (!data?.id || data.id === displayed.id) {
       busyRef.current = false;
