@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { getDailyQuote, getFeaturedQuotes, getLatestQuotes, getPopularQuotes, getAllTags } from "@/lib/queries";
+import { getDailyQuote, getFeaturedQuotes, getLatestQuotes, getPopularQuotes, getAllTags, getAllMasters } from "@/lib/queries";
 import { QuoteCard } from "@/components/QuoteCard";
 import { DailyHero } from "@/components/DailyHero";
+import { FilterTabs } from "@/components/FilterTabs";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,14 @@ export default function HomePage() {
   const latest = getLatestQuotes(6);
   const popular = getPopularQuotes(6);
   const tags = getAllTags();
+  const masters = getAllMasters();
+  
+  // 获取当天日期
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
+  const weekDays = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+  const weekDay = weekDays[today.getDay()];
+  const fullDate = `${dateStr} ${weekDay}`;
 
   return (
     <div>
@@ -19,35 +28,21 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative">
           <div className="text-center mb-8">
             <span
-              className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-4"
+              className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-2"
               style={{ background: "var(--t-bg-tag)", color: "var(--t-accent-text)" }}
             >
               ✨ 每日一言
             </span>
+            <div className="text-sm" style={{ color: "var(--t-text-secondary)" }}>
+              {fullDate}
+            </div>
           </div>
           {dailyQuote && <DailyHero initialQuote={dailyQuote} />}
         </div>
       </section>
 
-      {/* Tags */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-10">
-        <div
-          className="flex flex-wrap justify-center gap-2 rounded-2xl p-4 shadow-lg border transition-colors duration-300"
-          style={{ background: "var(--t-bg-card)", borderColor: "var(--t-border)" }}
-        >
-          {tags.map((tag) => (
-            <Link
-              key={tag.id}
-              href={`/topics/${tag.slug}`}
-              className="tag-pill transition-colors"
-              style={{ background: "var(--t-bg-tag)", color: "var(--t-tag-text)" }}
-            >
-              {tag.name}
-              <span className="ml-1.5 text-xs" style={{ color: "var(--t-text-muted)" }}>{tag.quote_count}</span>
-            </Link>
-          ))}
-        </div>
-      </section>
+      {/* Filter Tabs */}
+      <FilterTabs masters={masters} tags={tags} />
 
       {/* Sections */}
       {[

@@ -36,7 +36,7 @@
   --t-selection-bg: #ff00ff;
   --t-selection-text: #ffffff;
   --t-card-shadow: rgba(0,255,255,0.1);
-  --t-font-quote: var(--font-geist-mono), "Courier New", monospace;
+  --t-font-quote: "Courier New", "Noto Serif SC", monospace;
   --t-radius: 0.25rem;
   --t-particle: rgba(255,0,255,0.3);
 }
@@ -191,7 +191,7 @@
 }
 
 body {
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", sans-serif, "PingFang SC", "Microsoft YaHei";
   background-color: var(--t-bg);
   color: var(--t-text);
   transition: background-color 0.4s ease, color 0.4s ease;

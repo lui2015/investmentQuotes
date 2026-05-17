@@ -1,0 +1,113 @@
+-- ============================================
+-- 纳西姆·塔勒布名言
+-- ============================================
+
+INSERT OR IGNORE INTO quotes (id, content_cn, content_en, master_id, source, source_year, is_featured) VALUES
+('eq-t001', '在极端斯坦世界里，平均值几乎毫无意义。', 'In Extremistan, averages are almost meaningless.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t002', '人们总是低估罕见事件的可能性和影响。', 'People always underestimate the probability and impact of rare events.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t003', '在投资中，重要的是不要被黑天鹅事件摧毁。', 'In investing, what matters is not to be destroyed by black swan events.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t004', '反脆弱性意味着在压力下不仅能生存，还能茁壮成长。', 'Antifragility means not only surviving under stress, but thriving.', 'm-taleb', '反脆弱', 2012, 0),
+('eq-t005', '风险敞口是你不知道的风险。', 'Risk exposure is the risk you do not know.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t006', '复杂系统往往比简单系统更脆弱。', 'Complex systems are often more fragile than simple systems.', 'm-taleb', '反脆弱', 2012, 0),
+('eq-t007', '不要把预测和预言混为一谈。', 'Do not confuse prediction with prophecy.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t008', '最大的风险来自于你不知道的风险。', 'The biggest risk comes from risks you do not know.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t009', '在投资中，要为小概率大影响的事件做好准备。', 'In investing, be prepared for low-probability, high-impact events.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t010', '预测者往往不知道他们不知道什么。', 'Predictors often do not know what they do not know.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t011', '脆弱的事物在压力下会破碎，反脆弱的事物会从压力中获益。', 'Fragile things break under pressure; antifragile things benefit from pressure.', 'm-taleb', '反脆弱', 2012, 0),
+('eq-t012', '过度干预往往使系统更加脆弱。', 'Excessive intervention often makes systems more fragile.', 'm-taleb', '反脆弱', 2012, 0),
+('eq-t013', '我们生活在一个黑天鹅频发的世界里。', 'We live in a world where black swans occur frequently.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t014', '在投资中，要保持足够的冗余和备份。', 'In investing, maintain sufficient redundancy and backup.', 'm-taleb', '反脆弱', 2012, 0),
+('eq-t015', '不要依赖预测，而是要为各种情况做好准备。', 'Do not rely on predictions; instead, be prepared for various situations.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t016', '长期的稳定往往隐藏着巨大的风险。', 'Long-term stability often hides huge risks.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t017', '最好的策略是在大部分时间保持保守，在机会来临时大胆行动。', 'The best strategy is to be conservative most of the time and act boldly when opportunities arise.', 'm-taleb', '反脆弱', 2012, 0),
+('eq-t018', '历史会重复，但会以你想象不到的方式。', 'History repeats, but in ways you cannot imagine.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t019', '在投资中，保护本金比追求回报更重要。', 'In investing, protecting principal is more important than pursuing returns.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t020', '随机性是这个世界的基本特征。', 'Randomness is a fundamental characteristic of this world.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t021', '专家往往比普通人更容易犯错误，因为他们过于自信。', 'Experts are more likely to make mistakes than ordinary people because they are overconfident.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t022', '在极端世界里，少数事件往往决定大部分结果。', 'In Extremistan, a few events determine most of the outcomes.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t023', '风险管理的目标是生存，而不是盈利。', 'The goal of risk management is survival, not profit.', 'm-taleb', '反脆弱', 2012, 0),
+('eq-t024', '过度优化会导致脆弱性。', 'Over-optimization leads to fragility.', 'm-taleb', '反脆弱', 2012, 0),
+('eq-t025', '在投资中，要学会接受不确定性。', 'In investing, learn to accept uncertainty.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t026', '不要把可预测性和随机性混为一谈。', 'Do not confuse predictability with randomness.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t027', '复杂的金融工具往往隐藏着巨大的风险。', 'Complex financial instruments often hide huge risks.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t028', '在投资中，要为最坏情况做准备。', 'In investing, be prepared for the worst-case scenario.', 'm-taleb', '反脆弱', 2012, 0),
+('eq-t029', '过度依赖模型会导致系统性风险。', 'Over-reliance on models leads to systemic risk.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t030', '在极端情况下，大多数预测模型都会失败。', 'In extreme situations, most prediction models will fail.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t031', '投资的艺术在于知道什么时候应该保守，什么时候应该激进。', 'The art of investing is knowing when to be conservative and when to be aggressive.', 'm-taleb', '反脆弱', 2012, 0),
+('eq-t032', '风险和回报的关系比人们想象的要复杂得多。', 'The relationship between risk and return is much more complex than people think.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t033', '在投资中，要学会在不确定中寻找机会。', 'In investing, learn to find opportunities in uncertainty.', 'm-taleb', '反脆弱', 2012, 0),
+('eq-t034', '金融危机的发生往往是因为人们低估了尾部风险。', 'Financial crises often occur because people underestimate tail risk.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t035', '投资组合的多元化是应对不确定性的最好方式。', 'Portfolio diversification is the best way to deal with uncertainty.', 'm-taleb', '反脆弱', 2012, 0),
+('eq-t036', '在小概率事件上下小注，在大概率事件上下大注往往是错误的。', 'It is often wrong to bet small on low-probability events and big on high-probability events.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t037', '成功的投资者是那些能够在黑天鹅事件中幸存的人。', 'Successful investors are those who can survive black swan events.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t038', '在投资中，要避免那些只有小概率大收益的投资。', 'In investing, avoid investments with low-probability, high-return profiles.', 'm-taleb', '反脆弱', 2012, 0),
+('eq-t039', '理解随机性的本质是投资成功的基础。', 'Understanding the nature of randomness is the foundation of investment success.', 'm-taleb', '黑天鹅', 2007, 0),
+('eq-t040', '最好的投资策略是那些能够在最坏情况下也能生存的策略。', 'The best investment strategies are those that can survive even in the worst case.', 'm-taleb', '反脆弱', 2012, 0);
+
+-- 标签关联
+INSERT OR IGNORE INTO quote_tags (quote_id, tag_id) VALUES
+('eq-t001','t-risk'),('eq-t002','t-risk'),('eq-t003','t-risk'),('eq-t004','t-risk'),('eq-t005','t-risk'),
+('eq-t006','t-risk'),('eq-t007','t-risk'),('eq-t008','t-risk'),('eq-t009','t-risk'),('eq-t010','t-risk'),
+('eq-t011','t-risk'),('eq-t012','t-risk'),('eq-t013','t-risk'),('eq-t014','t-risk'),('eq-t015','t-risk'),
+('eq-t016','t-risk'),('eq-t017','t-risk'),('eq-t018','t-market'),('eq-t019','t-risk'),('eq-t020','t-risk'),
+('eq-t021','t-learning'),('eq-t022','t-risk'),('eq-t023','t-risk'),('eq-t024','t-risk'),('eq-t025','t-risk'),
+('eq-t026','t-risk'),('eq-t027','t-risk'),('eq-t028','t-risk'),('eq-t029','t-risk'),('eq-t030','t-risk'),
+('eq-t031','t-risk'),('eq-t032','t-risk'),('eq-t033','t-risk'),('eq-t034','t-risk'),('eq-t035','t-risk'),
+('eq-t036','t-risk'),('eq-t037','t-risk'),('eq-t038','t-risk'),('eq-t039','t-risk'),('eq-t040','t-risk');
+
+-- ============================================
+-- 塞斯·卡拉曼名言
+-- ============================================
+
+INSERT OR IGNORE INTO quotes (id, content_cn, content_en, master_id, source, source_year, is_featured) VALUES
+('eq-k001', '价值投资是寻找以显著低于内在价值的价格交易的证券。', 'Value investing is finding securities trading at significantly below intrinsic value.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k002', '安全边际是你为错误留出的空间。', 'Margin of safety is the space you leave for mistakes.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k003', '在投资中，耐心比聪明更重要。', 'In investing, patience is more important than intelligence.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k004', '价值投资要求你在别人不愿意投资的时候投资。', 'Value investing requires you to invest when others are unwilling to invest.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k005', '最大的投资错误往往来自于试图预测宏观经济。', 'The biggest investment mistakes often come from trying to predict the macro economy.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k006', '价值投资的核心是寻找被市场忽视的公司。', 'The core of value investing is finding companies ignored by the market.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k007', '投资成功的关键是风险管理，而不是追求回报。', 'The key to investment success is risk management, not pursuing returns.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k008', '价值投资者应该学会利用市场的情绪波动。', 'Value investors should learn to exploit market emotional fluctuations.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k009', '在投资中，损失厌恶是理性决策的最大障碍。', 'In investing, loss aversion is the biggest obstacle to rational decision-making.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k010', '价值投资的回报来自于价格向价值的回归。', 'Value investing returns come from price converging to value.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k011', '投资者应该关注那些有持久竞争优势的公司。', 'Investors should focus on companies with durable competitive advantages.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k012', '在市场恐慌时，价值投资者应该寻找机会。', 'When the market panics, value investors should look for opportunities.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k013', '价值投资需要时间和耐心。', 'Value investing requires time and patience.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k014', '投资于那些有强大现金流的公司。', 'Invest in companies with strong cash flows.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k015', '在投资中，安全边际是防止错误的最好保护。', 'In investing, margin of safety is the best protection against mistakes.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k016', '价值投资者不应该试图预测市场时机。', 'Value investors should not try to predict market timing.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k017', '好的投资往往来自于逆向思考。', 'Good investments often come from reverse thinking.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k018', '在投资中，不要把所有鸡蛋放在一个篮子里。', 'In investing, do not put all your eggs in one basket.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k019', '价值投资的核心是找到价格低于价值的证券。', 'The core of value investing is finding securities priced below their value.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k020', '投资者应该学会区分价格和价值。', 'Investors should learn to distinguish between price and value.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k021', '在投资中，最重要的是不要亏钱。', 'In investing, the most important thing is not to lose money.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k022', '价值投资者应该关注公司的基本面。', 'Value investors should focus on company fundamentals.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k023', '投资于那些有稳定商业模式的公司。', 'Invest in companies with stable business models.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k024', '在市场贪婪时，价值投资者应该保持谨慎。', 'When the market is greedy, value investors should stay cautious.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k025', '价值投资的成功来自于耐心等待价格回归价值。', 'Value investing success comes from patiently waiting for price to return to value.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k026', '投资者应该学会在压力下保持冷静。', 'Investors should learn to stay calm under pressure.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k027', '在投资中，便宜是硬道理。', 'In investing, cheapness is hard truth.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k028', '价值投资者应该关注长期价值，而不是短期价格波动。', 'Value investors should focus on long-term value, not short-term price fluctuations.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k029', '投资于那些有优秀管理层的公司。', 'Invest in companies with excellent management.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k030', '在投资中，风险管理应该放在第一位。', 'In investing, risk management should come first.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k031', '价值投资者不应该跟随市场共识。', 'Value investors should not follow market consensus.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k032', '投资成功的关键是找到有安全边际的投资机会。', 'The key to investment success is finding investment opportunities with margin of safety.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k033', '在投资中，情绪是最大的敌人。', 'In investing, emotions are the biggest enemy.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k034', '价值投资者应该学会利用市场的非理性。', 'Value investors should learn to exploit market irrationality.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k035', '投资于那些资产负债表健康的公司。', 'Invest in companies with healthy balance sheets.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k036', '在投资中，最重要的品质是耐心和纪律。', 'In investing, the most important qualities are patience and discipline.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k037', '价值投资的回报来自于价值发现。', 'Value investing returns come from value discovery.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k038', '投资者应该学会在别人恐惧时买入。', 'Investors should learn to buy when others are fearful.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k039', '在投资中，便宜买好货是最好的策略。', 'In investing, buying good things cheaply is the best strategy.', 'm-klarman', '安全边际', 1991, 0),
+('eq-k040', '价值投资者应该关注公司的内在价值。', 'Value investors should focus on company intrinsic value.', 'm-klarman', '安全边际', 1991, 0);
+
+-- 标签关联
+INSERT OR IGNORE INTO quote_tags (quote_id, tag_id) VALUES
+('eq-k001','t-value'),('eq-k002','t-value'),('eq-k003','t-longterm'),('eq-k004','t-contrarian'),('eq-k005','t-market'),
+('eq-k006','t-value'),('eq-k007','t-risk'),('eq-k008','t-market'),('eq-k009','t-mindset'),('eq-k010','t-value'),
+('eq-k011','t-business'),('eq-k012','t-contrarian'),('eq-k013','t-longterm'),('eq-k014','t-business'),('eq-k015','t-value'),
+('eq-k016','t-market'),('eq-k017','t-contrarian'),('eq-k018','t-risk'),('eq-k019','t-value'),('eq-k020','t-value'),
+('eq-k021','t-risk'),('eq-k022','t-business'),('eq-k023','t-business'),('eq-k024','t-contrarian'),('eq-k025','t-longterm'),
+('eq-k026','t-mindset'),('eq-k027','t-value'),('eq-k028','t-longterm'),('eq-k029','t-business'),('eq-k030','t-risk'),
+('eq-k031','t-contrarian'),('eq-k032','t-value'),('eq-k033','t-mindset'),('eq-k034','t-market'),('eq-k035','t-business'),
+('eq-k036','t-mindset'),('eq-k037','t-value'),('eq-k038','t-contrarian'),('eq-k039','t-value'),('eq-k040','t-value');
