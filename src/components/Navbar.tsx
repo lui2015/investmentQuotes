@@ -27,9 +27,8 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-8">
             {[
               { href: "/", label: "首页" },
-              { href: "/masters", label: "投资大师" },
-              { href: "/topics", label: "主题分类" },
               { href: "/quotes", label: "名言库" },
+              { href: "/api-docs", label: "贡献名言" },
             ].map((link) => (
               <Link
                 key={link.href}
@@ -66,9 +65,8 @@ export function Navbar() {
           <div className="md:hidden pb-4 space-y-1">
             {[
               { href: "/", label: "首页" },
-              { href: "/masters", label: "投资大师" },
-              { href: "/topics", label: "主题分类" },
               { href: "/quotes", label: "名言库" },
+              { href: "/api-docs", label: "贡献名言" },
             ].map((link) => (
               <Link
                 key={link.href}

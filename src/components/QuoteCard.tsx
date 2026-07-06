@@ -1,17 +1,25 @@
 import Link from "next/link";
 import type { Quote } from "@/lib/queries";
 
-export function QuoteCard({ quote, showMaster = true }: { quote: Quote; showMaster?: boolean }) {
+export function QuoteCard({ quote, showMaster = true, isNew = false }: { quote: Quote; showMaster?: boolean; isNew?: boolean }) {
   return (
     <Link href={`/quotes/${quote.id}`} className="block">
       <div
-        className="card-hover p-6 border h-full flex flex-col transition-colors duration-300"
+        className="card-hover p-6 border h-full flex flex-col relative transition-colors duration-300"
         style={{
           background: "var(--t-bg-card)",
           borderColor: "var(--t-border)",
           borderRadius: "var(--t-radius)",
         }}
       >
+        {isNew && (
+          <span
+            className="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 rounded-full"
+            style={{ background: "var(--t-accent)", color: "var(--t-bg)", letterSpacing: "0.05em" }}
+          >
+            NEW
+          </span>
+        )}
         <div className="flex-1">
           <div className="text-3xl mb-3 leading-none" style={{ color: "var(--t-accent)" }}>&ldquo;</div>
           <p className="quote-text text-base leading-relaxed mb-3" style={{ color: "var(--t-text)" }}>

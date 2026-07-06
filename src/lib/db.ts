@@ -72,10 +72,55 @@ export function initDb() {
       FOREIGN KEY (quote_id) REFERENCES quotes(id)
     );
 
+    -- 用户提交的名言（对外开放接口收集）
+    -- status: pending(待处理) / approved(已入库) / merged(与现有名言合并) / rejected(重复度过高)
+    CREATE TABLE IF NOT EXISTS quote_submissions (
+      id TEXT PRIMARY KEY,
+      content_cn TEXT NOT NULL,
+      content_en TEXT,
+      master_name TEXT NOT NULL,
+      source TEXT,
+      source_year INTEGER,
+      tags TEXT,
+      submitter TEXT,
+      submitter_ip TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
+      matched_quote_id TEXT,
+      matched_master_id TEXT,
+      similarity_score REAL,
+      dedupe_reason TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      processed_at TEXT
+    );
+
+    -- API 调用日志（每次调用一条）
+    CREATE TABLE IF NOT EXISTS api_call_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      endpoint TEXT NOT NULL,       -- 例如 POST /api/submit
+      method TEXT NOT NULL,         -- GET / POST
+      status_code INTEGER NOT NULL, -- HTTP 状态码
+      is_success INTEGER NOT NULL,  -- 1 成功 0 失败
+      is_batch INTEGER DEFAULT 0,   -- 是否批量
+      item_count INTEGER DEFAULT 1, -- 该调用涉及的名言条数
+      approved_count INTEGER DEFAULT 0,
+      rejected_count INTEGER DEFAULT 0,
+      failed_count INTEGER DEFAULT 0,
+      duration_ms INTEGER,          -- 耗时（毫秒）
+      client_ip TEXT,
+      user_agent TEXT,
+      called_at TEXT NOT NULL DEFAULT (datetime('now')),
+      call_date TEXT NOT NULL       -- YYYY-MM-DD，便于按日聚合
+    );
+
     CREATE INDEX IF NOT EXISTS idx_quotes_master ON quotes(master_id);
     CREATE INDEX IF NOT EXISTS idx_quotes_featured ON quotes(is_featured);
     CREATE INDEX IF NOT EXISTS idx_quote_tags_tag ON quote_tags(tag_id);
     CREATE INDEX IF NOT EXISTS idx_daily_quotes_date ON daily_quotes(display_date);
+    CREATE INDEX IF NOT EXISTS idx_submissions_status ON quote_submissions(status);
+    CREATE INDEX IF NOT EXISTS idx_submissions_created ON quote_submissions(created_at);
+    CREATE INDEX IF NOT EXISTS idx_api_log_date ON api_call_log(call_date);
+    CREATE INDEX IF NOT EXISTS idx_api_log_endpoint ON api_call_log(endpoint);
+    CREATE INDEX IF NOT EXISTS idx_api_log_called_at ON api_call_log(called_at);
   `);
 
   return db;
