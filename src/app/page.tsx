@@ -6,11 +6,11 @@ export const dynamic = "force-dynamic";
 
 export default function HomePage() {
   const daily = getDailyQuote();
-  // 今日推荐从 feed 中排除，避免重复
-  const allLatest = getLatestQuotes(40);
+  // 今日推荐从 feed 中排除，避免重复；展示 60 条让用户持续下滑浏览
+  const allLatest = getLatestQuotes(80);
   const quotes = daily
-    ? allLatest.filter((q) => q.id !== daily.id).slice(0, 24)
-    : allLatest.slice(0, 24);
+    ? allLatest.filter((q) => q.id !== daily.id).slice(0, 60)
+    : allLatest.slice(0, 60);
 
   // 7 天内的新增名言论为"新"
   const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
@@ -156,7 +156,7 @@ export default function HomePage() {
               borderRadius: "var(--t-radius)",
             }}
           >
-            <p style={{ color: "var(--t-text-secondary)" }}>暂无名言，<Link href="/api-docs" className="underline" style={{ color: "var(--t-accent)" }}>贡献一条</Link>？</p>
+            <p style={{ color: "var(--t-text-secondary)" }}>暂无名言</p>
           </div>
         ) : (
           quotes.map((quote) => (
@@ -167,39 +167,21 @@ export default function HomePage() {
             />
           ))
         )}
-      </div>
 
-      {/* 底部：查看更多 + 贡献 */}
-      {quotes.length > 0 && (
-        <div className="mt-12 md:mt-16 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Link
-            href="/quotes"
-            className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium border transition-all hover:scale-[1.02]"
-            style={{
-              background: "var(--t-bg-card)",
-              color: "var(--t-text)",
-              borderColor: "var(--t-border)",
-              borderRadius: "var(--t-radius)",
-            }}
+        {/* 滑到底的温柔提示 */}
+        {quotes.length > 0 && (
+          <div
+            className="pt-6 pb-2 text-center text-xs"
+            style={{ color: "var(--t-text-muted)" }}
           >
-            浏览全部名言
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
-          </Link>
-          <Link
-            href="/api-docs"
-            className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold transition-all hover:scale-[1.02]"
-            style={{
-              background: "var(--t-accent)",
-              color: "var(--t-bg)",
-              borderRadius: "var(--t-radius)",
-            }}
-          >
-            + 贡献名言
-          </Link>
-        </div>
-      )}
+            <div className="inline-flex items-center gap-2">
+              <span className="inline-block w-1 h-1 rounded-full" style={{ background: "currentColor" }} />
+              到底了 · 今天的 {quotes.length} 条已全部呈现
+              <span className="inline-block w-1 h-1 rounded-full" style={{ background: "currentColor" }} />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
