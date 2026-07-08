@@ -23,6 +23,7 @@ export interface Quote {
   source_year: number | null;
   is_featured: number;
   favorite_count: number;
+  is_machine_translated?: number | null;
   created_at: string;
   master_name_cn?: string;
   master_name_en?: string;
@@ -37,6 +38,17 @@ export interface Tag {
   slug: string;
   description: string;
   quote_count?: number;
+}
+
+export interface Interpretation {
+  /** 核心解读：这句话究竟在说什么（3-5 句，说人话） */
+  core: string;
+  /** 应用实操：给普通投资者的可执行清单（4-5 条，行动导向） */
+  practice: string[];
+  /** 生动案例：一个真实故事 / 场景化情节（1-2 段） */
+  story: string;
+  /** 大师视角：这句话在该大师思想体系里的位置 */
+  master_view: string | null;
 }
 
 function ensureDb() {
@@ -244,6 +256,41 @@ export function getQuoteById(id: string): Quote | null {
   }
 
   return row || null;
+}
+
+export function getQuoteInterpretation(quoteId: string): Interpretation | null {
+  ensureDb();
+  const db = initDb();
+  const row = db.prepare(`
+    SELECT quote_id, core, practice, story, master_view
+    FROM quote_interpretations
+    WHERE quote_id = ?
+  `).get(quoteId) as
+    | {
+        quote_id: string;
+        core: string;
+        practice: string;
+        story: string;
+        master_view: string | null;
+      }
+    | undefined;
+
+  if (!row) return null;
+
+  let practice: string[] = [];
+  try {
+    const parsed = JSON.parse(row.practice);
+    if (Array.isArray(parsed)) practice = parsed.map((v) => String(v));
+  } catch {
+    practice = row.practice ? [row.practice] : [];
+  }
+
+  return {
+    core: row.core,
+    practice,
+    story: row.story,
+    master_view: row.master_view ?? null,
+  };
 }
 
 export function searchQuotes(keyword: string): Quote[] {

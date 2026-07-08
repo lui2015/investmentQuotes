@@ -66,12 +66,48 @@ export default function ApiDocsPage() {
     source_year: "",
     tags: "",
     submitter: "",
+    ie_core: "",
+    ie_p1: "",
+    ie_p2: "",
+    ie_p3: "",
+    ie_p4: "",
+    ie_story: "",
+    ie_master_view: "",
   });
   const [batchJson, setBatchJson] = useState(
     JSON.stringify(
       [
-        { content_cn: "耐心是投资最稀缺的资产。", master_name: "沃伦·巴菲特", tags: ["长期主义"] },
-        { content_cn: "反过来想，总是反过来想。", master_name: "查理·芒格" },
+        {
+          content_cn: "耐心是投资最稀缺的资产。",
+          master_name: "沃伦·巴菲特",
+          tags: ["长期主义"],
+          interpretation: {
+            core: "投资中**耐心**远比聪明重要——等待'好机会'的能力就是最大的护城河。",
+            practice: [
+              "为每笔投资设定'至少持有 5 年'的心智锚",
+              "把市场波动视为'机会菜单'，不是'威胁'",
+              "建立'无聊持仓'的舒适区——不被热点牵着走",
+              "记录'等待期'里学到的——把它写成日记",
+            ],
+            story: "巴菲特持有可口可乐 30 多年，浮盈 100 倍+——他最经典的动作就是'什么都不做'。",
+            master_view: "巴菲特：'**我们最喜欢的持有期是永远。**'",
+          },
+        },
+        {
+          content_cn: "反过来想，总是反过来想。",
+          master_name: "查理·芒格",
+          interpretation: {
+            core: "芒格的核心方法论——研究'失败'比研究'成功'更有价值。",
+            practice: [
+              "列出每笔投资'亏钱的方式'，先解决它",
+              "为每个决策写一份'反向清单'",
+              "问自己：'一年后我会后悔吗？'",
+              "复盘失败案例比复盘成功案例多 3 倍",
+            ],
+            story: "芒格在 Daily Journal 年会中反复强调——他读过的失败案例比成功案例多 100 倍。",
+            master_view: "芒格：'**反过来想，总是反过来想。**'",
+          },
+        },
       ],
       null,
       2,
@@ -118,6 +154,12 @@ export default function ApiDocsPage() {
       const payload: Record<string, unknown> = {
         content_cn: form.content_cn.trim(),
         master_name: form.master_name.trim(),
+        interpretation: {
+          core: form.ie_core.trim(),
+          practice: [form.ie_p1.trim(), form.ie_p2.trim(), form.ie_p3.trim(), form.ie_p4.trim()],
+          story: form.ie_story.trim(),
+          master_view: form.ie_master_view.trim() || null,
+        },
       };
       if (form.content_en.trim()) payload.content_en = form.content_en.trim();
       if (form.source.trim()) payload.source = form.source.trim();
@@ -138,7 +180,10 @@ export default function ApiDocsPage() {
         data: data.data,
       });
       if (res.ok) {
-        setForm({ content_cn: "", content_en: "", master_name: "", source: "", source_year: "", tags: "", submitter: "" });
+        setForm({
+          content_cn: "", content_en: "", master_name: "", source: "", source_year: "", tags: "", submitter: "",
+          ie_core: "", ie_p1: "", ie_p2: "", ie_p3: "", ie_p4: "", ie_story: "", ie_master_view: "",
+        });
       }
       fetchStats();
     } catch (err) {
@@ -280,6 +325,80 @@ export default function ApiDocsPage() {
               </Field>
             </div>
 
+            {/* 4 块深度解读（必填） */}
+            <div
+              className="border p-5 mt-2"
+              style={{
+                background: "var(--t-bg-input)",
+                borderColor: "var(--t-accent)",
+                borderRadius: "var(--t-radius)",
+              }}
+            >
+              <div className="mb-3 text-sm font-semibold" style={{ color: "var(--t-accent)" }}>
+                4 块深度解读（必填）
+              </div>
+              <div className="space-y-4">
+                <Field label="① 核心解读 *" hint="3-5 句人话版，200-800 字最佳">
+                  <textarea
+                    required
+                    value={form.ie_core}
+                    onChange={(e) => setForm({ ...form, ie_core: e.target.value })}
+                    rows={3}
+                    placeholder="例：**价格是你付出的，价值是你得到的**——巴菲特对'价格 vs 价值'的核心区分。**多数人只懂'价格'——不懂'价值'。**"
+                    className="w-full px-4 py-3 border focus:outline-none focus:ring-2"
+                    style={inputStyle}
+                  />
+                </Field>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--t-text)" }}>
+                    ② 应用实操 *（恰好 4 条行动清单）
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {([
+                      ["ie_p1", "行动 1", "例：买入前先问'5 年后它能赚多少？'"],
+                      ["ie_p2", "行动 2", "例：用'内在价值'做决策锚——不是'价格'"],
+                      ["ie_p3", "行动 3", "例：把'看不懂的标的'列入'不买清单'"],
+                      ["ie_p4", "行动 4", "例：建立交易日志记录每笔决策的逻辑"],
+                    ] as const).map(([k, label, ph], i) => (
+                      <input
+                        key={k}
+                        required
+                        value={(form as unknown as Record<string, string>)[k]}
+                        onChange={(e) => setForm({ ...form, [k]: e.target.value })}
+                        placeholder={`${label} — ${ph}`}
+                        className="w-full px-3 py-2 border text-sm focus:outline-none focus:ring-2"
+                        style={inputStyle}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <Field label="③ 生动案例 *" hint="真实故事/场景化情节，80-300 字最佳">
+                  <textarea
+                    required
+                    value={form.ie_story}
+                    onChange={(e) => setForm({ ...form, ie_story: e.target.value })}
+                    rows={3}
+                    placeholder="例：巴菲特 1988 年开始买入可口可乐——当时 PE 15 倍——市场嘲笑他'追高'——持有到 2010 年回报 12 倍——成为他最经典的'长期持有'案例。"
+                    className="w-full px-4 py-3 border focus:outline-none focus:ring-2"
+                    style={inputStyle}
+                  />
+                </Field>
+
+                <Field label="④ 大师视角（可选）" hint="该名言在大师思想体系中的位置 + 引用">
+                  <textarea
+                    value={form.ie_master_view}
+                    onChange={(e) => setForm({ ...form, ie_master_view: e.target.value })}
+                    rows={2}
+                    placeholder="例：巴菲特说：'**我们最喜欢的持有期是永远。**' 芒格说：'**好机会是稀缺的——需要耐心等待。**'"
+                    className="w-full px-4 py-3 border focus:outline-none focus:ring-2"
+                    style={inputStyle}
+                  />
+                </Field>
+              </div>
+            </div>
+
             <button
               type="submit"
               disabled={loading}
@@ -353,7 +472,7 @@ export default function ApiDocsPage() {
           path="/api/submit"
           desc="提交名言（对外开放，无速率限制，即时入库并前台可见）"
         >
-          <SubTitle>单条提交</SubTitle>
+          <SubTitle>单条提交（4 块解读必填）</SubTitle>
           <CodeBlock>{`{
   "content_cn": "投资的第一条规则是不要亏钱。",   // 必填，4~500 字
   "master_name": "沃伦·巴菲特",                  // 必填，库中不存在会自动创建
@@ -361,13 +480,33 @@ export default function ApiDocsPage() {
   "source": "致股东的信",                         // 可选
   "source_year": 2008,                            // 可选
   "tags": ["风险管理", "价值投资"],               // 可选，最多 10 个
-  "submitter": "投资爱好者"                       // 可选
+  "submitter": "投资爱好者",                      // 可选
+
+  "interpretation": {                             // 必填
+    "core": "**'不亏钱'是数学上必然盈利的策略**——…",  // 必填，10~2000 字
+    "practice": [                                     // 必填，恰好 4 条
+      "把'不亏钱'作为第一原则",
+      "用'安全边际'为错误留出缓冲",
+      "评估最坏情况下的下行空间",
+      "对'高赔率'诱惑保持警惕"
+    ],
+    "story": "巴菲特 50 多年最大单年回撤 -51%（2008）…",  // 必填，20~3000 字
+    "master_view": "巴菲特：'**投资的第一条规则是不要亏钱。**'"  // 可空
+  }
 }`}</CodeBlock>
 
           <SubTitle>批量提交（形式一：JSON 数组）</SubTitle>
           <CodeBlock>{`[
-  { "content_cn": "耐心是投资最稀缺的资产。", "master_name": "沃伦·巴菲特" },
-  { "content_cn": "反过来想，总是反过来想。", "master_name": "查理·芒格" }
+  {
+    "content_cn": "耐心是投资最稀缺的资产。",
+    "master_name": "沃伦·巴菲特",
+    "interpretation": { "core": "…", "practice": ["…","…","…","…"], "story": "…", "master_view": null }
+  },
+  {
+    "content_cn": "反过来想，总是反过来想。",
+    "master_name": "查理·芒格",
+    "interpretation": { "core": "…", "practice": ["…","…","…","…"], "story": "…", "master_view": null }
+  }
 ]`}</CodeBlock>
 
           <SubTitle>批量提交（形式二：对象包装）</SubTitle>
@@ -460,7 +599,7 @@ export default function ApiDocsPage() {
         </h2>
         <div className="space-y-3 text-sm" style={{ color: "var(--t-text-secondary)" }}>
           <p>
-            1. <b>字段校验</b>：内容 4~500 字，作者不超过 50 字，年份合法
+            1. <b>字段校验</b>：内容 4~500 字，作者不超过 50 字，年份合法，<b>4 块解读必填</b>（core 10~2000 字 / practice 恰好 4 条 / story 20~3000 字 / master_view 可空）
           </p>
           <p>
             2. <b>大师匹配</b>：模糊匹配已有大师；库中不存在则自动创建（分类=user-submitted）

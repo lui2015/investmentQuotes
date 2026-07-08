@@ -93,6 +93,17 @@ export function initDb() {
       processed_at TEXT
     );
 
+    -- 名言 4 块深度解读（核心解读 / 应用实操 / 生动案例 / 大师视角）
+    CREATE TABLE IF NOT EXISTS quote_interpretations (
+      quote_id TEXT PRIMARY KEY,
+      core TEXT NOT NULL,         -- 核心解读
+      practice TEXT NOT NULL,     -- 应用实操（JSON 数组，4 条）
+      story TEXT NOT NULL,        -- 生动案例
+      master_view TEXT,           -- 大师视角（可空）
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (quote_id) REFERENCES quotes(id)
+    );
+
     -- API 调用日志（每次调用一条）
     CREATE TABLE IF NOT EXISTS api_call_log (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -121,6 +132,7 @@ export function initDb() {
     CREATE INDEX IF NOT EXISTS idx_api_log_date ON api_call_log(call_date);
     CREATE INDEX IF NOT EXISTS idx_api_log_endpoint ON api_call_log(endpoint);
     CREATE INDEX IF NOT EXISTS idx_api_log_called_at ON api_call_log(called_at);
+    CREATE INDEX IF NOT EXISTS idx_interp_created ON quote_interpretations(created_at);
   `);
 
   return db;

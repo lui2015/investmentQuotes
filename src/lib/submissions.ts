@@ -3,6 +3,17 @@ import { seedData } from "./seed";
 import { v4 } from "./uuid";
 import { combinedSimilarity, DEDUPE_THRESHOLDS, isSameMaster } from "./similarity";
 
+export interface InterpretationInput {
+  /** 核心解读：这句话究竟在说什么（3-5 句，说人话） */
+  core: string;
+  /** 应用实操：给普通投资者的可执行清单（4 条，行动导向） */
+  practice: string[];
+  /** 生动案例：一个真实故事 / 场景化情节（1-2 段） */
+  story: string;
+  /** 大师视角：这句话在该大师思想体系里的位置（可空） */
+  master_view?: string | null;
+}
+
 export interface SubmissionInput {
   content_cn: string;
   content_en?: string;
@@ -11,6 +22,14 @@ export interface SubmissionInput {
   source_year?: number;
   tags?: string[];
   submitter?: string;
+  /**
+   * 4 块深度解读（必填）：
+   * - core: 核心解读
+   * - practice: 应用实操 4 条
+   * - story: 生动案例
+   * - master_view: 大师视角（可空）
+   */
+  interpretation: InterpretationInput;
 }
 
 export interface Submission {
@@ -66,6 +85,34 @@ export function validateSubmission(input: Partial<SubmissionInput>): string | nu
     return "tags 最多 10 个";
   }
   if (input.submitter && input.submitter.length > 50) return "submitter 最多 50 字符";
+
+  // ── 4 块深度解读 校验（必填） ──
+  const ie = input.interpretation;
+  if (!ie || typeof ie !== "object") {
+    return "interpretation 必填，需要 4 块深度解读（core / practice / story / master_view）";
+  }
+  if (typeof ie.core !== "string" || ie.core.trim().length < 10) {
+    return "interpretation.core 必填且至少 10 字";
+  }
+  if (ie.core.length > 2000) return "interpretation.core 最多 2000 字";
+  if (!Array.isArray(ie.practice) || ie.practice.length !== 4) {
+    return "interpretation.practice 必须是恰好 4 条的数组";
+  }
+  for (let i = 0; i < 4; i++) {
+    const p = ie.practice[i];
+    if (typeof p !== "string" || p.trim().length < 4) {
+      return `interpretation.practice[${i}] 必填且至少 4 字`;
+    }
+    if (p.length > 500) return `interpretation.practice[${i}] 最多 500 字`;
+  }
+  if (typeof ie.story !== "string" || ie.story.trim().length < 20) {
+    return "interpretation.story 必填且至少 20 字";
+  }
+  if (ie.story.length > 3000) return "interpretation.story 最多 3000 字";
+  if (ie.master_view != null) {
+    if (typeof ie.master_view !== "string") return "interpretation.master_view 必须是字符串或 null";
+    if (ie.master_view.length > 1500) return "interpretation.master_view 最多 1500 字";
+  }
   return null;
 }
 
@@ -220,6 +267,20 @@ function processOneInTransaction(
       if (tag) insertTagRelStmt.run(newQuoteId, tag.id);
     }
   }
+
+  // 5.5 写入 4 块深度解读（必填，提交时已校验）
+  const ie = input.interpretation;
+  db.prepare(
+    `INSERT OR REPLACE INTO quote_interpretations
+     (quote_id, core, practice, story, master_view)
+     VALUES (?, ?, ?, ?, ?)`,
+  ).run(
+    newQuoteId,
+    ie.core.trim(),
+    JSON.stringify(ie.practice.map((s) => String(s).trim())),
+    ie.story.trim(),
+    ie.master_view ? ie.master_view.trim() : null,
+  );
 
   // 6. 记录 submission（approved）
   const approvedReason =
