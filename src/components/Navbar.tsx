@@ -69,7 +69,6 @@ export function Navbar() {
               onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t-accent)")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t-text-secondary)")}
             >
-              <span aria-hidden>♡</span>
               <span>我的收藏</span>
               {hydrated && count > 0 && (
                 <span
@@ -181,7 +180,7 @@ export function Navbar() {
               style={{ color: "var(--t-text)" }}
             >
               <span>
-                <span aria-hidden>♡</span> 我的收藏
+                <span>我的收藏</span>
               </span>
               {hydrated && count > 0 && (
                 <span
