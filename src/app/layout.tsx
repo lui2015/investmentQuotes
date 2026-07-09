@@ -3,6 +3,7 @@ import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { FavoritesProvider } from "@/components/FavoritesProvider";
 
 export const metadata: Metadata = {
   title: "投资名言 — 让大师思想照亮投资道路",
@@ -14,9 +15,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="zh-CN" data-theme="cyberpunk" suppressHydrationWarning>
       <body className="antialiased min-h-screen flex flex-col">
         <ThemeProvider>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <FavoritesProvider>
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </FavoritesProvider>
         </ThemeProvider>
       </body>
     </html>

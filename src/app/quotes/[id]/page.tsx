@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getQuoteById, getQuoteInterpretation, getRelatedQuotes } from "@/lib/queries";
 import { CopyButton } from "@/components/CopyButton";
 import { ExportImageButton } from "@/components/ExportImageButton";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { QuoteCard } from "@/components/QuoteCard";
 import type { Metadata } from "next";
 
@@ -71,6 +72,7 @@ export default async function QuoteDetailPage({ params }: { params: Params }) {
               </div>
             </Link>
             <div className="flex flex-wrap items-center gap-2">
+              <FavoriteButton quoteId={quote.id} />
               <ExportImageButton quote={quote} interp={interp} />
               <CopyButton quote={quote} />
             </div>

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import type { Quote, Tag, Master } from "@/lib/queries";
 import { withBasePath } from "@/lib/basePath";
+import { useFavorites } from "./FavoritesProvider";
 
 const tagIcons: Record<string, string> = {
   "价值投资": "💰", "长期主义": "⏳", "风险管理": "🛡️", "逆向思维": "🔄",
@@ -23,6 +24,7 @@ export function QuotesClient({
   masters: Master[];
 }) {
   const [tab, setTab] = useState<TabKey>("quotes");
+  const { isFavorite, hydrated } = useFavorites();
 
   // ── 名言搜索 ──
   const [quotes, setQuotes] = useState(initialQuotes);
@@ -149,42 +151,61 @@ export function QuotesClient({
           <p className="text-sm mb-6" style={{ color: "var(--t-text-muted)" }}>{filteredQuotes.length} 条名言</p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredQuotes.map((quote) => (
-              <Link key={quote.id} href={`/quotes/${quote.id}`} className="block">
-                <div
-                  className="card-hover p-6 border h-full flex flex-col transition-colors duration-300"
-                  style={{ background: "var(--t-bg-card)", borderColor: "var(--t-border)", borderRadius: "var(--t-radius)" }}
-                >
-                  <div className="flex-1">
-                    <div className="text-3xl mb-3 leading-none" style={{ color: "var(--t-accent)" }}>&ldquo;</div>
-                    <p className="quote-text text-base leading-relaxed mb-3" style={{ color: "var(--t-text)" }}>{quote.content_cn}</p>
-                    {quote.content_en && (
-                      <p className="text-sm italic leading-relaxed mb-4" style={{ color: "var(--t-text-muted)" }}>{quote.content_en}</p>
-                    )}
-                  </div>
-                  <div className="mt-4 pt-4 border-t" style={{ borderColor: "var(--t-border)" }}>
-                    <div className="flex items-center gap-3 mb-2">
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0"
-                        style={{ background: `linear-gradient(135deg, var(--t-avatar-from), var(--t-avatar-to))` }}
+            {filteredQuotes.map((quote) => {
+              const favorited = hydrated && isFavorite(quote.id);
+              return (
+                <Link key={quote.id} href={`/quotes/${quote.id}`} className="block">
+                  <div
+                    className="card-hover p-6 border h-full flex flex-col transition-colors duration-300 relative"
+                    style={{ background: "var(--t-bg-card)", borderColor: "var(--t-border)", borderRadius: "var(--t-radius)" }}
+                  >
+                    {favorited && (
+                      <span
+                        className="absolute top-3 right-3 inline-flex items-center justify-center w-6 h-6 rounded-full"
+                        style={{ background: "var(--t-accent-bg)", color: "var(--t-accent)" }}
+                        aria-label="已收藏"
+                        title="已收藏"
                       >
-                        {quote.master_name_cn?.charAt(0)}
-                      </div>
-                      <div className="text-sm font-medium" style={{ color: "var(--t-text)" }}>{quote.master_name_cn}</div>
-                    </div>
-                    {quote.tags && quote.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {quote.tags.map((tag) => (
-                          <span key={tag.id} className="text-xs px-2 py-0.5 rounded-full" style={{ background: "var(--t-bg-tag)", color: "var(--t-tag-text)" }}>
-                            {tag.name}
-                          </span>
-                        ))}
-                      </div>
+                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth={2}>
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                          />
+                        </svg>
+                      </span>
                     )}
+                    <div className="flex-1">
+                      <div className="text-3xl mb-3 leading-none" style={{ color: "var(--t-accent)" }}>&ldquo;</div>
+                      <p className="quote-text text-base leading-relaxed mb-3" style={{ color: "var(--t-text)" }}>{quote.content_cn}</p>
+                      {quote.content_en && (
+                        <p className="text-sm italic leading-relaxed mb-4" style={{ color: "var(--t-text-muted)" }}>{quote.content_en}</p>
+                      )}
+                    </div>
+                    <div className="mt-4 pt-4 border-t" style={{ borderColor: "var(--t-border)" }}>
+                      <div className="flex items-center gap-3 mb-2">
+                        <div
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0"
+                          style={{ background: `linear-gradient(135deg, var(--t-avatar-from), var(--t-avatar-to))` }}
+                        >
+                          {quote.master_name_cn?.charAt(0)}
+                        </div>
+                        <div className="text-sm font-medium" style={{ color: "var(--t-text)" }}>{quote.master_name_cn}</div>
+                      </div>
+                      {quote.tags && quote.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {quote.tags.map((tag) => (
+                            <span key={tag.id} className="text-xs px-2 py-0.5 rounded-full" style={{ background: "var(--t-bg-tag)", color: "var(--t-tag-text)" }}>
+                              {tag.name}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
 
           {filteredQuotes.length === 0 && (
