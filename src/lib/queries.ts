@@ -369,3 +369,139 @@ export function getAllQuotes(): Quote[] {
 
   return rows;
 }
+
+// ──────────────────────────────────────────────────────────────────────
+// 管理后台：分页 / 搜索 / 更新 / 删除
+// ──────────────────────────────────────────────────────────────────────
+
+export interface ListQuotesParams {
+  search?: string;
+  masterId?: string;
+  page: number;
+  pageSize: number;
+}
+
+export interface ListQuotesResult {
+  items: Quote[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export function listQuotesAdmin({
+  search,
+  masterId,
+  page,
+  pageSize,
+}: ListQuotesParams): ListQuotesResult {
+  ensureDb();
+  const db = initDb();
+
+  const where: string[] = [];
+  const params: unknown[] = [];
+
+  if (search && search.trim()) {
+    const like = `%${search.trim()}%`;
+    where.push("(q.content_cn LIKE ? OR q.content_en LIKE ? OR m.name_cn LIKE ?)");
+    params.push(like, like, like);
+  }
+  if (masterId) {
+    where.push("q.master_id = ?");
+    params.push(masterId);
+  }
+
+  const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
+  const totalRow = db
+    .prepare(`SELECT COUNT(*) as c FROM quotes q JOIN masters m ON q.master_id = m.id ${whereSql}`)
+    .get(...params) as { c: number };
+  const total = totalRow.c;
+
+  const offset = (page - 1) * pageSize;
+  const rows = db
+    .prepare(
+      `SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category
+       FROM quotes q
+       JOIN masters m ON q.master_id = m.id
+       ${whereSql}
+       ORDER BY q.created_at DESC, q.id DESC
+       LIMIT ? OFFSET ?`,
+    )
+    .all(...params, pageSize, offset) as Quote[];
+
+  for (const row of rows) {
+    row.tags = getQuoteTags(row.id);
+  }
+
+  return {
+    items: rows,
+    total,
+    page,
+    pageSize,
+    totalPages: Math.max(1, Math.ceil(total / pageSize)),
+  };
+}
+
+export interface UpdateQuotePatch {
+  content_cn?: string;
+  content_en?: string | null;
+  master_id?: string;
+  source?: string | null;
+  source_year?: number | null;
+  is_featured?: number;
+}
+
+export function updateQuote(id: string, patch: UpdateQuotePatch): Quote | null {
+  ensureDb();
+  const db = initDb();
+
+  const fields: string[] = [];
+  const values: unknown[] = [];
+
+  if (patch.content_cn !== undefined) {
+    fields.push("content_cn = ?");
+    values.push(patch.content_cn);
+  }
+  if (patch.content_en !== undefined) {
+    fields.push("content_en = ?");
+    values.push(patch.content_en);
+  }
+  if (patch.master_id !== undefined) {
+    fields.push("master_id = ?");
+    values.push(patch.master_id);
+  }
+  if (patch.source !== undefined) {
+    fields.push("source = ?");
+    values.push(patch.source);
+  }
+  if (patch.source_year !== undefined) {
+    fields.push("source_year = ?");
+    values.push(patch.source_year);
+  }
+  if (patch.is_featured !== undefined) {
+    fields.push("is_featured = ?");
+    values.push(patch.is_featured);
+  }
+
+  if (fields.length === 0) return getQuoteById(id);
+
+  values.push(id);
+  const res = db
+    .prepare(`UPDATE quotes SET ${fields.join(", ")} WHERE id = ?`)
+    .run(...values);
+  if (res.changes === 0) return null;
+
+  return getQuoteById(id);
+}
+
+export function deleteQuote(id: string): boolean {
+  ensureDb();
+  const db = initDb();
+  const tx = db.transaction((quoteId: string) => {
+    db.prepare("DELETE FROM quote_tags WHERE quote_id = ?").run(quoteId);
+    const res = db.prepare("DELETE FROM quotes WHERE id = ?").run(quoteId);
+    return res.changes > 0;
+  });
+  return tx(id);
+}

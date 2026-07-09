@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: "/quotes", label: "名言库" },
   { href: "/api-docs", label: "贡献名言" },
   { href: "/favorites", label: "我的收藏" },
+  { href: "/admin/quotes", label: "名言管理" },
 ];
 
 export function Navbar() {
