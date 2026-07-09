@@ -48,13 +48,17 @@ export default async function MasterDetailPage({ params }: { params: Params }) {
               <span className="text-lg" style={{ color: "var(--t-text-muted)" }}>{master.name_en}</span>
             </div>
             <div className="flex flex-wrap gap-2 mb-4">
-              {[master.title, master.category, `${master.nationality} · ${master.born_year}年生`].map((label) => (
-                <span key={label} className="tag-pill" style={{ background: "var(--t-bg-tag)", color: "var(--t-tag-text)" }}>
-                  {label}
-                </span>
-              ))}
+              {[master.title, master.category, [master.nationality, master.born_year ? `${master.born_year}年生` : null].filter(Boolean).join(" · ")]
+                .filter((label) => label && String(label).trim().length > 0)
+                .map((label) => (
+                  <span key={String(label)} className="tag-pill" style={{ background: "var(--t-bg-tag)", color: "var(--t-tag-text)" }}>
+                    {label}
+                  </span>
+                ))}
             </div>
-            <p className="leading-relaxed" style={{ color: "var(--t-text-secondary)" }}>{master.bio}</p>
+            {master.bio && (
+              <p className="leading-relaxed" style={{ color: "var(--t-text-secondary)" }}>{master.bio}</p>
+            )}
           </div>
         </div>
       </div>

@@ -127,26 +127,35 @@ export function MastersClient({ masters }: { masters: Master[] }) {
                       </p>
                     </div>
                   </div>
-                  <div className="mb-3">
-                    <span
-                      className="text-xs px-2 py-0.5 rounded-full font-medium"
-                      style={{ background: "var(--t-bg-tag)", color: "var(--t-tag-text)" }}
+                  {master.title && (
+                    <div className="mb-3">
+                      <span
+                        className="text-xs px-2 py-0.5 rounded-full font-medium"
+                        style={{ background: "var(--t-bg-tag)", color: "var(--t-tag-text)" }}
+                      >
+                        {master.title}
+                      </span>
+                    </div>
+                  )}
+                  {master.bio && (
+                    <p
+                      className="text-sm line-clamp-2 leading-relaxed mb-4"
+                      style={{ color: "var(--t-text-secondary)" }}
                     >
-                      {master.title}
-                    </span>
-                  </div>
-                  <p
-                    className="text-sm line-clamp-2 leading-relaxed mb-4"
-                    style={{ color: "var(--t-text-secondary)" }}
-                  >
-                    {master.bio}
-                  </p>
+                      {master.bio}
+                    </p>
+                  )}
                   <div
                     className="flex items-center justify-between text-xs"
                     style={{ color: "var(--t-text-muted)" }}
                   >
                     <span>
-                      {master.nationality} · {master.born_year}年生
+                      {[
+                        master.nationality,
+                        master.born_year ? `${master.born_year}年生` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ") || "—"}
                     </span>
                     <span className="font-medium" style={{ color: "var(--t-accent)" }}>
                       {master.quote_count} 条名言
