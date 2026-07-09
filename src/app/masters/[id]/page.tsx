@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getMaster, getMasterQuotes } from "@/lib/queries";
 import { QuoteCard } from "@/components/QuoteCard";
+import { MasterAvatar } from "@/components/MasterAvatar";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -36,12 +37,11 @@ export default async function MasterDetailPage({ params }: { params: Params }) {
         style={{ background: "var(--t-bg-card)", borderColor: "var(--t-border)", borderRadius: "calc(var(--t-radius) * 1.5)" }}
       >
         <div className="flex flex-col md:flex-row items-start gap-8">
-          <div
-            className="w-24 h-24 rounded-full flex items-center justify-center text-white font-bold text-4xl shrink-0 shadow-xl"
-            style={{ background: `linear-gradient(135deg, var(--t-avatar-from), var(--t-avatar-to))` }}
-          >
-            {master.name_cn.charAt(0)}
-          </div>
+          <MasterAvatar
+            name={master.name_cn}
+            avatarUrl={master.avatar_url}
+            className="w-24 h-24 rounded-full shadow-xl"
+          />
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-3 mb-2">
               <h1 className="text-3xl md:text-4xl font-bold" style={{ color: "var(--t-text)" }}>{master.name_cn}</h1>

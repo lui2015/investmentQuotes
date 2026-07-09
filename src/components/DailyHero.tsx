@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { withBasePath } from "@/lib/basePath";
+import { MasterAvatar } from "./MasterAvatar";
 
 interface QuoteData {
   id: string;
@@ -122,15 +123,14 @@ export function DailyHero({ initialQuote }: { initialQuote: QuoteData }) {
           className="flex items-center justify-center gap-3 mb-8 char-animate"
           style={{ animationDelay: "500ms" }}
         >
-          <div
-            className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg"
-            style={{
+          <MasterAvatar
+            name={displayed.master_name_cn || ""}
+            className="w-12 h-12 rounded-full text-white font-bold text-lg shadow-lg"
+            fallbackStyle={{
               background: `linear-gradient(135deg, var(--t-avatar-from), var(--t-avatar-to))`,
               boxShadow: `0 0 0 2px var(--t-glow), 0 4px 12px var(--t-card-shadow)`,
             }}
-          >
-            {displayed.master_name_cn?.charAt(0)}
-          </div>
+          />
           <div className="text-left">
             <Link href={`/masters/${displayed.master_id}`} className="font-semibold hover:underline" style={{ color: "var(--t-hero-text)" }}>
               {displayed.master_name_cn}

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Quote } from "@/lib/queries";
 import { useFavorites } from "./FavoritesProvider";
+import { MasterAvatar } from "./MasterAvatar";
 
 function formatRelativeTime(createdAt: string): string {
   const ts = new Date(createdAt.replace(" ", "T") + "Z").getTime();
@@ -38,12 +39,10 @@ export function FeedQuoteCard({ quote, isNew = false }: { quote: Quote; isNew?: 
         {/* 作者行 */}
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-3 min-w-0">
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
-              style={{ background: `linear-gradient(135deg, var(--t-avatar-from), var(--t-avatar-to))` }}
-            >
-              {quote.master_name_cn?.charAt(0) || "?"}
-            </div>
+            <MasterAvatar
+              name={quote.master_name_cn || ""}
+              className="w-10 h-10 rounded-full text-white font-bold text-sm"
+            />
             <div className="min-w-0">
               <div className="font-semibold text-sm truncate" style={{ color: "var(--t-text)" }}>
                 {quote.master_name_cn}

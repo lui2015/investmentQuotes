@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Quote } from "@/lib/queries";
 import { useFavorites } from "./FavoritesProvider";
+import { MasterAvatar } from "./MasterAvatar";
 
 export function QuoteCard({ quote, showMaster = true, isNew = false }: { quote: Quote; showMaster?: boolean; isNew?: boolean }) {
   const { isFavorite, hydrated } = useFavorites();
@@ -57,12 +58,10 @@ export function QuoteCard({ quote, showMaster = true, isNew = false }: { quote: 
         <div className="mt-4 pt-4 border-t" style={{ borderColor: "var(--t-border)" }}>
           {showMaster && (
             <div className="flex items-center gap-3 mb-3">
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
-                style={{ background: `linear-gradient(135deg, var(--t-avatar-from), var(--t-avatar-to))` }}
-              >
-                {quote.master_name_cn?.charAt(0) || "?"}
-              </div>
+              <MasterAvatar
+                name={quote.master_name_cn || ""}
+                className="w-10 h-10 rounded-full text-white font-bold text-sm"
+              />
               <div>
                 <div className="font-semibold text-sm" style={{ color: "var(--t-text)" }}>
                   {quote.master_name_cn}

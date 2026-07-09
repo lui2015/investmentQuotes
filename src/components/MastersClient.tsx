@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { Master } from "@/lib/queries";
+import { MasterAvatar } from "./MasterAvatar";
 
 export function MastersClient({ masters }: { masters: Master[] }) {
   const [search, setSearch] = useState("");
@@ -110,14 +111,11 @@ export function MastersClient({ masters }: { masters: Master[] }) {
                   }}
                 >
                   <div className="flex items-center gap-4 mb-4">
-                    <div
-                      className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl shrink-0 shadow-lg"
-                      style={{
-                        background: `linear-gradient(135deg, var(--t-avatar-from), var(--t-avatar-to))`,
-                      }}
-                    >
-                      {master.name_cn.charAt(0)}
-                    </div>
+                    <MasterAvatar
+                      name={master.name_cn}
+                      avatarUrl={master.avatar_url}
+                      className="w-14 h-14 rounded-full text-white font-bold text-xl shadow-lg"
+                    />
                     <div>
                       <h3 className="font-bold" style={{ color: "var(--t-text)" }}>
                         {master.name_cn}

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useFavorites } from "@/components/FavoritesProvider";
 import { withBasePath } from "@/lib/basePath";
+import { MasterAvatar } from "@/components/MasterAvatar";
 import type { Quote } from "@/lib/queries";
 
 export default function FavoritesPage() {
@@ -191,12 +192,10 @@ function FavoriteQuoteCard({ quote }: { quote: Quote }) {
 
         <div className="mt-4 pt-4 border-t" style={{ borderColor: "var(--t-border)" }}>
           <div className="flex items-center gap-3">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0"
-              style={{ background: `linear-gradient(135deg, var(--t-avatar-from), var(--t-avatar-to))` }}
-            >
-              {quote.master_name_cn?.charAt(0) || "?"}
-            </div>
+            <MasterAvatar
+              name={quote.master_name_cn || ""}
+              className="w-8 h-8 rounded-full text-white font-bold text-xs"
+            />
             <div className="min-w-0">
               <div
                 className="text-sm font-medium truncate"

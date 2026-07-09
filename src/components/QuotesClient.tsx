@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { Quote, Tag, Master } from "@/lib/queries";
 import { withBasePath } from "@/lib/basePath";
 import { useFavorites } from "./FavoritesProvider";
+import { MasterAvatar } from "./MasterAvatar";
 
 const tagIcons: Record<string, string> = {
   "价值投资": "💰", "长期主义": "⏳", "风险管理": "🛡️", "逆向思维": "🔄",
@@ -184,12 +185,10 @@ export function QuotesClient({
                     </div>
                     <div className="mt-4 pt-4 border-t" style={{ borderColor: "var(--t-border)" }}>
                       <div className="flex items-center gap-3 mb-2">
-                        <div
-                          className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0"
-                          style={{ background: `linear-gradient(135deg, var(--t-avatar-from), var(--t-avatar-to))` }}
-                        >
-                          {quote.master_name_cn?.charAt(0)}
-                        </div>
+                        <MasterAvatar
+                          name={quote.master_name_cn || ""}
+                          className="w-8 h-8 rounded-full text-white font-bold text-xs"
+                        />
                         <div className="text-sm font-medium" style={{ color: "var(--t-text)" }}>{quote.master_name_cn}</div>
                       </div>
                       {quote.tags && quote.tags.length > 0 && (
@@ -263,9 +262,11 @@ export function QuotesClient({
                   <Link key={master.id} href={`/masters/${master.id}`} className="block">
                     <div className="card-hover p-6 border h-full transition-colors duration-300" style={{ background: "var(--t-bg-card)", borderColor: "var(--t-border)", borderRadius: "var(--t-radius)" }}>
                       <div className="flex items-center gap-4 mb-4">
-                        <div className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl shrink-0 shadow-lg" style={{ background: `linear-gradient(135deg, var(--t-avatar-from), var(--t-avatar-to))` }}>
-                          {master.name_cn.charAt(0)}
-                        </div>
+                        <MasterAvatar
+                          name={master.name_cn}
+                          avatarUrl={master.avatar_url}
+                          className="w-14 h-14 rounded-full text-white font-bold text-xl shadow-lg"
+                        />
                         <div>
                           <h3 className="font-bold" style={{ color: "var(--t-text)" }}>{master.name_cn}</h3>
                           <p className="text-sm" style={{ color: "var(--t-text-muted)" }}>{master.name_en}</p>

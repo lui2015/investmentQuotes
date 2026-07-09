@@ -5,6 +5,7 @@ import { CopyButton } from "@/components/CopyButton";
 import { ExportImageButton } from "@/components/ExportImageButton";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { QuoteCard } from "@/components/QuoteCard";
+import { MasterAvatar } from "@/components/MasterAvatar";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -57,12 +58,10 @@ export default async function QuoteDetailPage({ params }: { params: Params }) {
         <div className="border-t pt-6 mt-6" style={{ borderColor: "var(--t-border)" }}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <Link href={`/masters/${quote.master_id}`} className="flex items-center gap-4 group">
-              <div
-                className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl shrink-0 shadow-lg"
-                style={{ background: `linear-gradient(135deg, var(--t-avatar-from), var(--t-avatar-to))` }}
-              >
-                {quote.master_name_cn?.charAt(0)}
-              </div>
+              <MasterAvatar
+                name={quote.master_name_cn || ""}
+                className="w-14 h-14 rounded-full text-white font-bold text-xl shadow-lg"
+              />
               <div>
                 <div className="font-bold text-lg group-hover:underline" style={{ color: "var(--t-text)" }}>
                   {quote.master_name_cn}

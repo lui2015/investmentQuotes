@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getDailyQuote, getLatestQuotes } from "@/lib/queries";
 import { FeedQuoteCard } from "@/components/FeedQuoteCard";
+import { MasterAvatar } from "@/components/MasterAvatar";
 
 export const dynamic = "force-dynamic";
 
@@ -84,12 +85,10 @@ export default function HomePage() {
 
               <div className="flex flex-wrap items-center justify-between gap-3 pl-2 md:pl-4">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div
-                    className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-base shrink-0 shadow-md"
-                    style={{ background: `linear-gradient(135deg, var(--t-avatar-from), var(--t-avatar-to))` }}
-                  >
-                    {daily.master_name_cn?.charAt(0) || "?"}
-                  </div>
+                  <MasterAvatar
+                    name={daily.master_name_cn || ""}
+                    className="w-11 h-11 rounded-full text-white font-bold text-base shadow-md"
+                  />
                   <div className="min-w-0">
                     <div className="font-semibold text-sm md:text-base truncate" style={{ color: "var(--t-text)" }}>
                       {daily.master_name_cn}
