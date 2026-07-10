@@ -41,6 +41,7 @@ export function FeedQuoteCard({ quote, isNew = false }: { quote: Quote; isNew?: 
           <div className="flex items-center gap-3 min-w-0">
             <MasterAvatar
               name={quote.master_name_cn || ""}
+              avatarUrl={quote.master_avatar_url}
               className="w-10 h-10 rounded-full text-white font-bold text-sm"
             />
             <div className="min-w-0">

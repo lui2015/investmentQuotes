@@ -12,6 +12,7 @@ interface QuoteData {
   master_id: string;
   master_name_cn?: string;
   master_title?: string;
+  master_avatar_url?: string | null;
 }
 
 type AnimPhase = "idle" | "exit" | "enter";
@@ -125,6 +126,7 @@ export function DailyHero({ initialQuote }: { initialQuote: QuoteData }) {
         >
           <MasterAvatar
             name={displayed.master_name_cn || ""}
+            avatarUrl={displayed.master_avatar_url}
             className="w-12 h-12 rounded-full text-white font-bold text-lg shadow-lg"
             fallbackStyle={{
               background: `linear-gradient(135deg, var(--t-avatar-from), var(--t-avatar-to))`,

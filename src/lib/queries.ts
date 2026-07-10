@@ -29,6 +29,7 @@ export interface Quote {
   master_name_en?: string;
   master_title?: string;
   master_category?: string;
+  master_avatar_url?: string | null;
   tags?: Tag[];
 }
 
@@ -61,7 +62,7 @@ export function getDailyQuote(): Quote | null {
   const today = new Date().toISOString().split("T")[0];
 
   let row = db.prepare(`
-    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category
+    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category, m.avatar_url as master_avatar_url
     FROM daily_quotes dq
     JOIN quotes q ON dq.quote_id = q.id
     JOIN masters m ON q.master_id = m.id
@@ -70,7 +71,7 @@ export function getDailyQuote(): Quote | null {
 
   if (!row) {
     row = db.prepare(`
-      SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category
+      SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category, m.avatar_url as master_avatar_url
       FROM quotes q
       JOIN masters m ON q.master_id = m.id
       WHERE q.is_featured = 1
@@ -89,7 +90,7 @@ export function getRandomQuote(): Quote | null {
   ensureDb();
   const db = initDb();
   const row = db.prepare(`
-    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category
+    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category, m.avatar_url as master_avatar_url
     FROM quotes q
     JOIN masters m ON q.master_id = m.id
     ORDER BY RANDOM() LIMIT 1
@@ -106,7 +107,7 @@ export function getFeaturedQuotes(limit = 6): Quote[] {
   ensureDb();
   const db = initDb();
   const rows = db.prepare(`
-    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category
+    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category, m.avatar_url as master_avatar_url
     FROM quotes q
     JOIN masters m ON q.master_id = m.id
     WHERE q.is_featured = 1
@@ -125,7 +126,7 @@ export function getLatestQuotes(limit = 6): Quote[] {
   ensureDb();
   const db = initDb();
   const rows = db.prepare(`
-    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category
+    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category, m.avatar_url as master_avatar_url
     FROM quotes q
     JOIN masters m ON q.master_id = m.id
     ORDER BY q.created_at DESC
@@ -143,7 +144,7 @@ export function getPopularQuotes(limit = 6): Quote[] {
   ensureDb();
   const db = initDb();
   const rows = db.prepare(`
-    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category
+    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category, m.avatar_url as master_avatar_url
     FROM quotes q
     JOIN masters m ON q.master_id = m.id
     ORDER BY q.favorite_count DESC, q.is_featured DESC
@@ -180,7 +181,7 @@ export function getMasterQuotes(masterId: string): Quote[] {
   ensureDb();
   const db = initDb();
   const rows = db.prepare(`
-    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category
+    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category, m.avatar_url as master_avatar_url
     FROM quotes q
     JOIN masters m ON q.master_id = m.id
     WHERE q.master_id = ?
@@ -217,7 +218,7 @@ export function getQuotesByTag(tagId: string): Quote[] {
   ensureDb();
   const db = initDb();
   const rows = db.prepare(`
-    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category
+    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category, m.avatar_url as master_avatar_url
     FROM quotes q
     JOIN masters m ON q.master_id = m.id
     JOIN quote_tags qt ON qt.quote_id = q.id
@@ -245,7 +246,7 @@ export function getQuoteById(id: string): Quote | null {
   ensureDb();
   const db = initDb();
   const row = db.prepare(`
-    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category
+    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category, m.avatar_url as master_avatar_url
     FROM quotes q
     JOIN masters m ON q.master_id = m.id
     WHERE q.id = ?
@@ -298,7 +299,7 @@ export function searchQuotes(keyword: string): Quote[] {
   const db = initDb();
   const like = `%${keyword}%`;
   const rows = db.prepare(`
-    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category
+    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category, m.avatar_url as master_avatar_url
     FROM quotes q
     JOIN masters m ON q.master_id = m.id
     WHERE q.content_cn LIKE ? OR q.content_en LIKE ? OR m.name_cn LIKE ? OR m.name_en LIKE ?
@@ -317,7 +318,7 @@ export function getRelatedQuotes(quoteId: string, limit = 4): Quote[] {
   ensureDb();
   const db = initDb();
   const rows = db.prepare(`
-    SELECT DISTINCT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category
+    SELECT DISTINCT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category, m.avatar_url as master_avatar_url
     FROM quotes q
     JOIN masters m ON q.master_id = m.id
     JOIN quote_tags qt ON qt.quote_id = q.id
@@ -338,7 +339,7 @@ export function getDailyHistory(days = 30): Array<{ display_date: string; quote:
   ensureDb();
   const db = initDb();
   const rows = db.prepare(`
-    SELECT dq.display_date, q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category
+    SELECT dq.display_date, q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category, m.avatar_url as master_avatar_url
     FROM daily_quotes dq
     JOIN quotes q ON dq.quote_id = q.id
     JOIN masters m ON q.master_id = m.id
@@ -357,7 +358,7 @@ export function getAllQuotes(): Quote[] {
   ensureDb();
   const db = initDb();
   const rows = db.prepare(`
-    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category
+    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category, m.avatar_url as master_avatar_url
     FROM quotes q
     JOIN masters m ON q.master_id = m.id
     ORDER BY q.is_featured DESC, q.favorite_count DESC
@@ -421,7 +422,7 @@ export function listQuotesAdmin({
   const offset = (page - 1) * pageSize;
   const rows = db
     .prepare(
-      `SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category
+      `SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category, m.avatar_url as master_avatar_url
        FROM quotes q
        JOIN masters m ON q.master_id = m.id
        ${whereSql}

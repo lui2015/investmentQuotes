@@ -302,6 +302,8 @@ const QuotePoster = forwardRef<
   const P = palette;
   const initial = (quote.master_name_cn || "?").charAt(0);
   const tags = (quote.tags ?? []).slice(0, 3);
+  const [avatarOk, setAvatarOk] = useState(true);
+  const hasAvatar = Boolean(quote.master_avatar_url) && avatarOk;
 
   // 主引文 + 英文 引文裁剪：
   // 中文按字数裁剪，英文按行数裁剪
@@ -422,6 +424,7 @@ const QuotePoster = forwardRef<
             width: "130px",
             height: "130px",
             borderRadius: "50%",
+            overflow: "hidden",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -433,7 +436,18 @@ const QuotePoster = forwardRef<
             flexShrink: 0,
           }}
         >
-          {initial}
+          {hasAvatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={quote.master_avatar_url!}
+              alt={quote.master_name_cn || ""}
+              crossOrigin="anonymous"
+              onError={() => setAvatarOk(false)}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            />
+          ) : (
+            <span>{initial}</span>
+          )}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div

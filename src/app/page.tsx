@@ -87,6 +87,7 @@ export default function HomePage() {
                 <div className="flex items-center gap-3 min-w-0">
                   <MasterAvatar
                     name={daily.master_name_cn || ""}
+                    avatarUrl={daily.master_avatar_url}
                     className="w-11 h-11 rounded-full text-white font-bold text-base shadow-md"
                   />
                   <div className="min-w-0">

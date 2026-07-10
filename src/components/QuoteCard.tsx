@@ -60,6 +60,7 @@ export function QuoteCard({ quote, showMaster = true, isNew = false }: { quote: 
             <div className="flex items-center gap-3 mb-3">
               <MasterAvatar
                 name={quote.master_name_cn || ""}
+                avatarUrl={quote.master_avatar_url}
                 className="w-10 h-10 rounded-full text-white font-bold text-sm"
               />
               <div>

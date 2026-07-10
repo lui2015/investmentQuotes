@@ -60,6 +60,7 @@ export default async function QuoteDetailPage({ params }: { params: Params }) {
             <Link href={`/masters/${quote.master_id}`} className="flex items-center gap-4 group">
               <MasterAvatar
                 name={quote.master_name_cn || ""}
+                avatarUrl={quote.master_avatar_url}
                 className="w-14 h-14 rounded-full text-white font-bold text-xl shadow-lg"
               />
               <div>

@@ -187,6 +187,7 @@ export function QuotesClient({
                       <div className="flex items-center gap-3 mb-2">
                         <MasterAvatar
                           name={quote.master_name_cn || ""}
+                          avatarUrl={quote.master_avatar_url}
                           className="w-8 h-8 rounded-full text-white font-bold text-xs"
                         />
                         <div className="text-sm font-medium" style={{ color: "var(--t-text)" }}>{quote.master_name_cn}</div>
