@@ -258,6 +258,20 @@ const quotes = [
 export function seedData() {
   const db = initDb();
 
+  // 头像自愈：保证关键大师头像在数据库里有值（idempotent，幂等）
+  // 放在 masterCount 检查之前，确保生产库已有数据时也能修复 avatar_url
+  {
+    const AVATAR_DEFAULTS: Record<string, string> = {
+      "m-buffett": "/avatars/buffett.png",
+    };
+    const upsertAvatar = db.prepare(
+      `UPDATE masters SET avatar_url = ? WHERE id = ? AND (avatar_url IS NULL OR avatar_url = '')`,
+    );
+    for (const [id, url] of Object.entries(AVATAR_DEFAULTS)) {
+      upsertAvatar.run(url, id);
+    }
+  }
+
   const masterCount = (db.prepare("SELECT COUNT(*) as count FROM masters").get() as { count: number }).count;
   if (masterCount > 0) return;
 
@@ -311,16 +325,4 @@ export function seedData() {
   });
 
   transaction();
-
-  // 头像自愈：保证关键大师头像在数据库里有值
-  // 在已有数据的生产库上也能安全运行（只在 avatar_url 为空时更新）
-  const AVATAR_DEFAULTS: Record<string, string> = {
-    "m-buffett": "/avatars/buffett.png",
-  };
-  const upsertAvatar = db.prepare(
-    `UPDATE masters SET avatar_url = ? WHERE id = ? AND (avatar_url IS NULL OR avatar_url = '')`,
-  );
-  for (const [id, url] of Object.entries(AVATAR_DEFAULTS)) {
-    upsertAvatar.run(url, id);
-  }
 }
