@@ -158,7 +158,27 @@ export function getPopularQuotes(limit = 6): Quote[] {
   return rows;
 }
 
+/**
+ * 公开的大师列表：排除 `category='user-submitted'` 的"自动创建"大师。
+ * 这些大师是用户提交名言时自动产生的，作者信息(title/bio/nationality/born_year/name_en)为空，
+ * 在公开的"投资大师"页面上展示会出现大量空白卡片，体验差。
+ * 他们的名言依然会通过名言库正常展示（join 时仍可取到 name_cn），不会影响内容完整性。
+ */
 export function getAllMasters(): Master[] {
+  ensureDb();
+  const db = initDb();
+  return db.prepare(`
+    SELECT m.*, (SELECT COUNT(*) FROM quotes q WHERE q.master_id = m.id) as quote_count
+    FROM masters m
+    WHERE m.category != 'user-submitted' OR m.category IS NULL
+    ORDER BY m.category, m.name_cn
+  `).all() as Master[];
+}
+
+/**
+ * 全量大师列表（不过滤 user-submitted），仅供管理后台使用。
+ */
+export function getAllMastersAdmin(): Master[] {
   ensureDb();
   const db = initDb();
   return db.prepare(`

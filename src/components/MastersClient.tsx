@@ -5,18 +5,6 @@ import Link from "next/link";
 import type { Master } from "@/lib/queries";
 import { MasterAvatar } from "./MasterAvatar";
 
-// 内部 category 枚举 -> 面向用户的展示名
-// 'user-submitted' 是系统内部标记：自动从用户投稿创建出来的大师
-// 不应该原样展示给用户
-const CATEGORY_DISPLAY: Record<string, string> = {
-  "user-submitted": "用户投稿",
-};
-
-function displayCategory(category: string | null | undefined): string {
-  if (!category) return "其他";
-  return CATEGORY_DISPLAY[category] || category;
-}
-
 export function MastersClient({ masters }: { masters: Master[] }) {
   const [search, setSearch] = useState("");
 
@@ -29,7 +17,7 @@ export function MastersClient({ masters }: { masters: Master[] }) {
         m.name_en,
         m.title,
         m.bio,
-        displayCategory(m.category),
+        m.category,
         m.nationality,
       ];
       return fields.some((f) => f && f.toLowerCase().includes(kw));
@@ -38,7 +26,7 @@ export function MastersClient({ masters }: { masters: Master[] }) {
 
   const grouped = useMemo(() => {
     return filtered.reduce((acc, m) => {
-      const cat = displayCategory(m.category) || "其他";
+      const cat = m.category || "其他";
       if (!acc[cat]) acc[cat] = [];
       acc[cat].push(m);
       return acc;

@@ -45,7 +45,9 @@ export default async function MasterDetailPage({ params }: { params: Params }) {
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-3 mb-2">
               <h1 className="text-3xl md:text-4xl font-bold" style={{ color: "var(--t-text)" }}>{master.name_cn}</h1>
-              <span className="text-lg" style={{ color: "var(--t-text-muted)" }}>{master.name_en}</span>
+              {master.name_en && (
+                <span className="text-lg" style={{ color: "var(--t-text-muted)" }}>{master.name_en}</span>
+              )}
             </div>
             <div className="flex flex-wrap gap-2 mb-4">
               {[master.title, master.category !== "user-submitted" ? master.category : null, [master.nationality, master.born_year ? `${master.born_year}年生` : null].filter(Boolean).join(" · ")]

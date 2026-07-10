@@ -261,27 +261,51 @@ export function QuotesClient({
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {categoryMasters.map((master) => (
                   <Link key={master.id} href={`/masters/${master.id}`} className="block">
-                    <div className="card-hover p-6 border h-full transition-colors duration-300" style={{ background: "var(--t-bg-card)", borderColor: "var(--t-border)", borderRadius: "var(--t-radius)" }}>
+                    <div
+                      className="card-hover p-6 border h-full transition-colors duration-300 flex flex-col"
+                      style={{ background: "var(--t-bg-card)", borderColor: "var(--t-border)", borderRadius: "var(--t-radius)" }}
+                    >
                       <div className="flex items-center gap-4 mb-4">
                         <MasterAvatar
                           name={master.name_cn}
                           avatarUrl={master.avatar_url}
                           className="w-14 h-14 rounded-full text-white font-bold text-xl shadow-lg"
                         />
-                        <div>
-                          <h3 className="font-bold" style={{ color: "var(--t-text)" }}>{master.name_cn}</h3>
-                          <p className="text-sm" style={{ color: "var(--t-text-muted)" }}>{master.name_en}</p>
+                        <div className="min-w-0">
+                          <h3 className="font-bold truncate" style={{ color: "var(--t-text)" }}>{master.name_cn}</h3>
+                          {master.name_en && (
+                            <p className="text-sm truncate" style={{ color: "var(--t-text-muted)" }}>{master.name_en}</p>
+                          )}
                         </div>
                       </div>
-                      <div className="mb-3">
-                        <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: "var(--t-bg-tag)", color: "var(--t-tag-text)" }}>
-                          {master.title}
+                      {master.title && (
+                        <div className="mb-3">
+                          <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: "var(--t-bg-tag)", color: "var(--t-tag-text)" }}>
+                            {master.title}
+                          </span>
+                        </div>
+                      )}
+                      {master.bio && (
+                        <p className="text-sm line-clamp-2 leading-relaxed mb-4" style={{ color: "var(--t-text-secondary)" }}>{master.bio}</p>
+                      )}
+                      <div
+                        className="flex items-center justify-between text-xs mt-auto pt-3"
+                        style={{
+                          color: "var(--t-text-muted)",
+                          borderTop: master.title || master.bio ? "1px solid var(--t-border)" : "none",
+                        }}
+                      >
+                        <span className="truncate">
+                          {[
+                            master.nationality,
+                            master.born_year ? `${master.born_year}年生` : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ") || "—"}
                         </span>
-                      </div>
-                      <p className="text-sm line-clamp-2 leading-relaxed mb-4" style={{ color: "var(--t-text-secondary)" }}>{master.bio}</p>
-                      <div className="flex items-center justify-between text-xs" style={{ color: "var(--t-text-muted)" }}>
-                        <span>{master.nationality} · {master.born_year}年生</span>
-                        <span className="font-medium" style={{ color: "var(--t-accent)" }}>{master.quote_count} 条名言</span>
+                        <span className="font-medium flex-shrink-0 ml-2" style={{ color: "var(--t-accent)" }}>
+                          {master.quote_count} 条名言
+                        </span>
                       </div>
                     </div>
                   </Link>
