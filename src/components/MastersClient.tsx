@@ -5,6 +5,18 @@ import Link from "next/link";
 import type { Master } from "@/lib/queries";
 import { MasterAvatar } from "./MasterAvatar";
 
+// 内部 category 枚举 -> 面向用户的展示名
+// 'user-submitted' 是系统内部标记：自动从用户投稿创建出来的大师
+// 不应该原样展示给用户
+const CATEGORY_DISPLAY: Record<string, string> = {
+  "user-submitted": "用户投稿",
+};
+
+function displayCategory(category: string | null | undefined): string {
+  if (!category) return "其他";
+  return CATEGORY_DISPLAY[category] || category;
+}
+
 export function MastersClient({ masters }: { masters: Master[] }) {
   const [search, setSearch] = useState("");
 
@@ -17,7 +29,7 @@ export function MastersClient({ masters }: { masters: Master[] }) {
         m.name_en,
         m.title,
         m.bio,
-        m.category,
+        displayCategory(m.category),
         m.nationality,
       ];
       return fields.some((f) => f && f.toLowerCase().includes(kw));
@@ -26,7 +38,7 @@ export function MastersClient({ masters }: { masters: Master[] }) {
 
   const grouped = useMemo(() => {
     return filtered.reduce((acc, m) => {
-      const cat = m.category || "其他";
+      const cat = displayCategory(m.category) || "其他";
       if (!acc[cat]) acc[cat] = [];
       acc[cat].push(m);
       return acc;
@@ -103,7 +115,7 @@ export function MastersClient({ masters }: { masters: Master[] }) {
                 className="block"
               >
                 <div
-                  className="card-hover p-6 border h-full transition-colors duration-300"
+                  className="card-hover p-6 border h-full transition-colors duration-300 flex flex-col"
                   style={{
                     background: "var(--t-bg-card)",
                     borderColor: "var(--t-border)",
@@ -116,13 +128,21 @@ export function MastersClient({ masters }: { masters: Master[] }) {
                       avatarUrl={master.avatar_url}
                       className="w-14 h-14 rounded-full text-white font-bold text-xl shadow-lg"
                     />
-                    <div>
-                      <h3 className="font-bold" style={{ color: "var(--t-text)" }}>
+                    <div className="min-w-0">
+                      <h3
+                        className="font-bold truncate"
+                        style={{ color: "var(--t-text)" }}
+                      >
                         {master.name_cn}
                       </h3>
-                      <p className="text-sm" style={{ color: "var(--t-text-muted)" }}>
-                        {master.name_en}
-                      </p>
+                      {master.name_en && (
+                        <p
+                          className="text-sm truncate"
+                          style={{ color: "var(--t-text-muted)" }}
+                        >
+                          {master.name_en}
+                        </p>
+                      )}
                     </div>
                   </div>
                   {master.title && (
@@ -144,10 +164,16 @@ export function MastersClient({ masters }: { masters: Master[] }) {
                     </p>
                   )}
                   <div
-                    className="flex items-center justify-between text-xs"
-                    style={{ color: "var(--t-text-muted)" }}
+                    className="flex items-center justify-between text-xs mt-auto pt-3"
+                    style={{
+                      color: "var(--t-text-muted)",
+                      borderTop:
+                        master.title || master.bio
+                          ? "1px solid var(--t-border)"
+                          : "none",
+                    }}
                   >
-                    <span>
+                    <span className="truncate">
                       {[
                         master.nationality,
                         master.born_year ? `${master.born_year}年生` : null,
@@ -155,7 +181,10 @@ export function MastersClient({ masters }: { masters: Master[] }) {
                         .filter(Boolean)
                         .join(" · ") || "—"}
                     </span>
-                    <span className="font-medium" style={{ color: "var(--t-accent)" }}>
+                    <span
+                      className="font-medium flex-shrink-0 ml-2"
+                      style={{ color: "var(--t-accent)" }}
+                    >
                       {master.quote_count} 条名言
                     </span>
                   </div>
