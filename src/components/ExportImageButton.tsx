@@ -504,26 +504,27 @@ const QuotePoster = forwardRef<
         </div>
       </div>
 
-      {/* ============== 引文区（自适应高度） ============== */}
+      {/* ============== 引文区（自适应高度，垂直居中，均分留白） ============== */}
       <div
         style={{
           flex: "1 1 auto",
-          padding: "40px 72px 32px 72px",
+          padding: "36px 72px 32px 72px",
           display: "flex",
           flexDirection: "column",
+          justifyContent: "center", // 关键：短名言时上下均分留白，避免底部大空洞
           minHeight: 0, // 关键：允许内部内容收缩
         }}
       >
         {/* 装饰巨型引号 */}
         <div
           style={{
-            fontSize: "180px",
+            fontSize: "150px",
             lineHeight: 0.55,
             color: hexToRgba(P.accent, 0.55),
             fontFamily: "Georgia, serif",
             fontWeight: 700,
-            marginBottom: "10px",
-            height: "100px",
+            marginBottom: "6px",
+            height: "82px",
             flex: "0 0 auto",
           }}
         >

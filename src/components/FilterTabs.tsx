@@ -35,8 +35,9 @@ export function FilterTabs({ masters, tags }: FilterTabsProps) {
         {/* Tab Headers */}
         <div className="flex border-b" style={{ borderColor: "var(--t-border)" }}>
           <button
+            type="button"
             onClick={() => setActiveTab("masters")}
-            className="flex-1 px-4 py-3 text-sm font-medium transition-colors"
+            className="flex-1 px-4 py-3 text-sm font-medium transition-colors cursor-pointer"
             style={{
               background: activeTab === "masters" ? "var(--t-accent-bg)" : "transparent",
               color: activeTab === "masters" ? "var(--t-accent)" : "var(--t-text-secondary)",
@@ -46,8 +47,9 @@ export function FilterTabs({ masters, tags }: FilterTabsProps) {
             按大师筛选
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab("topics")}
-            className="flex-1 px-4 py-3 text-sm font-medium transition-colors"
+            className="flex-1 px-4 py-3 text-sm font-medium transition-colors cursor-pointer"
             style={{
               background: activeTab === "topics" ? "var(--t-accent-bg)" : "transparent",
               color: activeTab === "topics" ? "var(--t-accent)" : "var(--t-text-secondary)",
