@@ -3,18 +3,43 @@ import type { NextRequest } from "next/server";
 import {
   deleteQuote,
   getQuoteById,
+  getQuoteInterpretation,
   updateQuote,
+  upsertQuoteInterpretation,
+  type InterpretationPatch,
   type UpdateQuotePatch,
 } from "@/lib/queries";
+
+/**
+ * GET /api/admin/quotes/[id]
+ *   返回 { quote, interpretation }，给编辑弹窗按需加载
+ */
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+  const quote = getQuoteById(id);
+  if (!quote) {
+    return NextResponse.json({ error: "quote not found" }, { status: 404 });
+  }
+  const interpretation = getQuoteInterpretation(id);
+  return NextResponse.json({ quote, interpretation });
+}
 
 export const dynamic = "force-dynamic";
 
 /**
  * PATCH /api/admin/quotes/[id]
- *   body: 任意子集 { content_cn, content_en, master_id, source, source_year, is_featured }
+ *   body: 任意子集 { content_cn, content_en, master_id, source, source_year, is_featured, interpretation }
  *   - master_id 必须指向已存在的大师
  *   - is_featured 只接受 0 / 1
- *   - 至少包含一个可更新字段
+ *   - interpretation: 嵌套对象 { core?, practice?, story?, master_view? }
+ *     - core: 字符串
+ *     - practice: 字符串数组（1-10 条，空字符串会被过滤）
+ *     - story: 字符串
+ *     - master_view: 字符串或 null
+ *   - 至少包含一个可更新字段（顶层或 interpretation 内）
  */
 export async function PATCH(
   request: NextRequest,
@@ -109,7 +134,77 @@ export async function PATCH(
     }
   }
 
-  if (Object.keys(patch).length === 0) {
+  // 解读字段（嵌套对象，可选）
+  let interpPatch: InterpretationPatch | null = null;
+  if (body.interpretation !== undefined && body.interpretation !== null) {
+    if (typeof body.interpretation !== "object" || Array.isArray(body.interpretation)) {
+      return NextResponse.json(
+        { error: "interpretation 必须是对象" },
+        { status: 400 },
+      );
+    }
+    const raw = body.interpretation as Record<string, unknown>;
+    const ip: InterpretationPatch = {};
+
+    if (raw.core !== undefined) {
+      if (typeof raw.core !== "string") {
+        return NextResponse.json(
+          { error: "interpretation.core 必须是字符串" },
+          { status: 400 },
+        );
+      }
+      ip.core = raw.core;
+    }
+
+    if (raw.practice !== undefined) {
+      if (!Array.isArray(raw.practice)) {
+        return NextResponse.json(
+          { error: "interpretation.practice 必须是字符串数组" },
+          { status: 400 },
+        );
+      }
+      if (raw.practice.some((v) => typeof v !== "string")) {
+        return NextResponse.json(
+          { error: "interpretation.practice 所有元素必须是字符串" },
+          { status: 400 },
+        );
+      }
+      if (raw.practice.length < 1 || raw.practice.length > 10) {
+        return NextResponse.json(
+          { error: "interpretation.practice 长度需在 1-10 之间" },
+          { status: 400 },
+        );
+      }
+      ip.practice = raw.practice as string[];
+    }
+
+    if (raw.story !== undefined) {
+      if (typeof raw.story !== "string") {
+        return NextResponse.json(
+          { error: "interpretation.story 必须是字符串" },
+          { status: 400 },
+        );
+      }
+      ip.story = raw.story;
+    }
+
+    if (raw.master_view !== undefined) {
+      if (raw.master_view === null) {
+        ip.master_view = null;
+      } else if (typeof raw.master_view === "string") {
+        ip.master_view = raw.master_view;
+      } else {
+        return NextResponse.json(
+          { error: "interpretation.master_view 必须是字符串或 null" },
+          { status: 400 },
+        );
+      }
+    }
+
+    if (Object.keys(ip).length > 0) interpPatch = ip;
+  }
+
+  if (Object.keys(patch).length === 0 && !interpPatch) {
     return NextResponse.json(
       { error: "至少提供一个可更新字段" },
       { status: 400 },
@@ -117,11 +212,26 @@ export async function PATCH(
   }
 
   try {
-    const updated = updateQuote(id, patch);
-    if (!updated) {
-      return NextResponse.json({ error: "update failed" }, { status: 500 });
+    let updated = existing;
+    if (Object.keys(patch).length > 0) {
+      const res = updateQuote(id, patch);
+      if (!res) {
+        return NextResponse.json({ error: "update failed" }, { status: 500 });
+      }
+      updated = res;
     }
-    return NextResponse.json(updated);
+    let interp = getQuoteInterpretation(id);
+    if (interpPatch) {
+      const saved = upsertQuoteInterpretation(id, interpPatch);
+      if (!saved) {
+        return NextResponse.json(
+          { error: "解读保存失败：core / practice / story 至少要有非空内容" },
+          { status: 400 },
+        );
+      }
+      interp = saved;
+    }
+    return NextResponse.json({ ...updated, interpretation: interp });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: message }, { status: 500 });

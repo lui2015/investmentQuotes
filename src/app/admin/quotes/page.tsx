@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { withBasePath } from "@/lib/basePath";
-import type { Quote } from "@/lib/queries";
+import { usePathname } from "next/navigation";
+import type { Interpretation, Quote } from "@/lib/queries";
 
 interface ListResponse {
   items: Quote[];
@@ -27,6 +28,7 @@ interface Toast {
 }
 
 export default function AdminQuotesPage() {
+  const pathname = usePathname();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -41,6 +43,7 @@ export default function AdminQuotesPage() {
   const [deleting, setDeleting] = useState<Quote | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const toastIdRef = useRef(0);
+  const exportingRef = useRef(false);
 
   const pushToast = useCallback((kind: ToastKind, message: string) => {
     const id = ++toastIdRef.current;
@@ -49,6 +52,29 @@ export default function AdminQuotesPage() {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 3200);
   }, []);
+
+  const handleExport = useCallback(async () => {
+    if (exportingRef.current) return;
+    exportingRef.current = true;
+    pushToast("info", "正在生成 Excel…");
+    try {
+      const url = new URL(window.location.href);
+      url.pathname = withBasePath(pathname);
+      url.searchParams.set("export", "xlsx");
+      // 直接通过 <a download> 触发，避免 fetch 拦截
+      const a = document.createElement("a");
+      a.href = url.toString();
+      a.download = "";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      pushToast("success", "已开始下载");
+    } catch {
+      pushToast("error", "导出失败");
+    } finally {
+      exportingRef.current = false;
+    }
+  }, [pathname, pushToast]);
 
   const loadMasters = useCallback(async () => {
     try {
@@ -131,6 +157,13 @@ export default function AdminQuotesPage() {
           <p className="text-sm" style={{ color: "var(--t-text-secondary)" }}>
             编辑或删除现有名言。共 <strong>{total}</strong> 条记录。
           </p>
+          <button
+            onClick={handleExport}
+            className="px-4 py-2 text-sm font-medium rounded-md transition-all hover:opacity-90"
+            style={{ background: "var(--t-accent)", color: "var(--t-bg)" }}
+          >
+            📥 一键导出 Excel
+          </button>
         </div>
       </header>
 
@@ -405,8 +438,52 @@ function EditModal({ quote, masters, onClose, onSaved, onError }: EditModalProps
     quote.source_year ? String(quote.source_year) : "",
   );
   const [isFeatured, setIsFeatured] = useState(quote.is_featured === 1);
+  // 解读 4 块
+  const [core, setCore] = useState("");
+  const [practice, setPractice] = useState<string[]>(["", "", "", ""]);
+  const [story, setStory] = useState("");
+  const [masterView, setMasterView] = useState("");
+  const [interpLoading, setInterpLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
+
+  // 打开弹窗时拉取现有解读
+  useEffect(() => {
+    let cancelled = false;
+    setInterpLoading(true);
+    (async () => {
+      try {
+        const res = await fetch(withBasePath(`/api/admin/quotes/${quote.id}`));
+        if (!res.ok) return;
+        const data = (await res.json()) as {
+          interpretation: Interpretation | null;
+        };
+        if (cancelled) return;
+        const ip = data.interpretation;
+        if (ip) {
+          setCore(ip.core ?? "");
+          const arr = (ip.practice ?? []).slice(0, 10);
+          // 补齐到 4 条以便编辑
+          while (arr.length < 4) arr.push("");
+          setPractice(arr);
+          setStory(ip.story ?? "");
+          setMasterView(ip.master_view ?? "");
+        } else {
+          setCore("");
+          setPractice(["", "", "", ""]);
+          setStory("");
+          setMasterView("");
+        }
+      } catch {
+        /* 静默失败，留空让用户填写 */
+      } finally {
+        if (!cancelled) setInterpLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [quote.id]);
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
@@ -437,6 +514,24 @@ function EditModal({ quote, masters, onClose, onSaved, onError }: EditModalProps
       body.source = source.trim() ? source.trim() : null;
       body.source_year = sourceYear.trim() ? Number(sourceYear) : null;
 
+      // 解读 patch：过滤空条目后仅当至少有一项非空才发送
+      const cleanPractice = practice
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+      const hasInterp =
+        core.trim().length > 0 ||
+        cleanPractice.length > 0 ||
+        story.trim().length > 0 ||
+        masterView.trim().length > 0;
+      if (hasInterp) {
+        body.interpretation = {
+          core: core.trim(),
+          practice: cleanPractice,
+          story: story.trim(),
+          master_view: masterView.trim() ? masterView.trim() : null,
+        };
+      }
+
       const res = await fetch(withBasePath(`/api/admin/quotes/${quote.id}`), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -456,6 +551,16 @@ function EditModal({ quote, masters, onClose, onSaved, onError }: EditModalProps
     }
   };
 
+  const updatePractice = (idx: number, value: string) => {
+    setPractice((prev) => prev.map((v, i) => (i === idx ? value : v)));
+  };
+  const addPractice = () => {
+    setPractice((prev) => (prev.length >= 10 ? prev : [...prev, ""]));
+  };
+  const removePractice = (idx: number) => {
+    setPractice((prev) => prev.filter((_, i) => i !== idx));
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -466,7 +571,7 @@ function EditModal({ quote, masters, onClose, onSaved, onError }: EditModalProps
     >
       <div
         ref={dialogRef}
-        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto border"
+        className="w-full max-w-3xl max-h-[90vh] overflow-y-auto border"
         style={{ background: "var(--t-bg-card)", borderColor: "var(--t-border)", borderRadius: "var(--t-radius)" }}
         role="dialog"
         aria-modal="true"
@@ -550,6 +655,134 @@ function EditModal({ quote, masters, onClose, onSaved, onError }: EditModalProps
                 style={{ background: "var(--t-bg)", color: "var(--t-text)", borderColor: "var(--t-border)" }}
               />
             </Field>
+          </div>
+
+          {/* ============== 解读信息（4 块） ============== */}
+          <div
+            className="pt-4 border-t"
+            style={{ borderColor: "var(--t-border)" }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3
+                  className="text-sm font-bold flex items-center gap-2"
+                  style={{ color: "var(--t-text)" }}
+                >
+                  <span aria-hidden>💡</span>
+                  解读信息
+                </h3>
+                <p
+                  className="text-xs mt-0.5"
+                  style={{ color: "var(--t-text-muted)" }}
+                >
+                  保存后会在名言详情页和导出海报中显示
+                </p>
+              </div>
+              {interpLoading && (
+                <span
+                  className="text-xs"
+                  style={{ color: "var(--t-text-muted)" }}
+                >
+                  加载中…
+                </span>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <Field label="核心解读" required={false}>
+                <textarea
+                  value={core}
+                  onChange={(e) => setCore(e.target.value)}
+                  rows={3}
+                  placeholder="这句话究竟在说什么（3-5 句，说人话）"
+                  className="w-full px-3 py-2 rounded-md border text-sm outline-none focus:ring-2 transition-all resize-y"
+                  style={{ background: "var(--t-bg)", color: "var(--t-text)", borderColor: "var(--t-border)" }}
+                />
+              </Field>
+
+              <div>
+                <label
+                  className="block text-xs font-medium mb-1.5"
+                  style={{ color: "var(--t-text-secondary)" }}
+                >
+                  应用实操（4-5 条行动清单）
+                </label>
+                <div className="space-y-2">
+                  {practice.map((item, idx) => (
+                    <div key={idx} className="flex items-start gap-2">
+                      <span
+                        className="shrink-0 mt-2 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+                        style={{ background: "var(--t-accent)" }}
+                      >
+                        {idx + 1}
+                      </span>
+                      <input
+                        type="text"
+                        value={item}
+                        onChange={(e) => updatePractice(idx, e.target.value)}
+                        placeholder={`第 ${idx + 1} 条行动建议`}
+                        className="flex-1 px-3 py-1.5 rounded-md border text-sm outline-none focus:ring-2 transition-all"
+                        style={{
+                          background: "var(--t-bg)",
+                          color: "var(--t-text)",
+                          borderColor: "var(--t-border)",
+                        }}
+                      />
+                      {practice.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removePractice(idx)}
+                          className="shrink-0 px-2 py-1.5 text-xs rounded-md transition-colors"
+                          style={{
+                            background: "var(--t-bg-tag)",
+                            color: "var(--t-text-muted)",
+                          }}
+                          title="删除这一条"
+                          aria-label={`删除第 ${idx + 1} 条`}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {practice.length < 10 && (
+                  <button
+                    type="button"
+                    onClick={addPractice}
+                    className="mt-2 px-3 py-1.5 text-xs rounded-md transition-colors"
+                    style={{
+                      background: "var(--t-bg-tag)",
+                      color: "var(--t-text)",
+                    }}
+                  >
+                    + 添加一条
+                  </button>
+                )}
+              </div>
+
+              <Field label="生动案例" required={false}>
+                <textarea
+                  value={story}
+                  onChange={(e) => setStory(e.target.value)}
+                  rows={4}
+                  placeholder="一个真实故事 / 场景化情节（1-2 段）"
+                  className="w-full px-3 py-2 rounded-md border text-sm outline-none focus:ring-2 transition-all resize-y"
+                  style={{ background: "var(--t-bg)", color: "var(--t-text)", borderColor: "var(--t-border)" }}
+                />
+              </Field>
+
+              <Field label="大师视角（可选）" required={false}>
+                <textarea
+                  value={masterView}
+                  onChange={(e) => setMasterView(e.target.value)}
+                  rows={2}
+                  placeholder="这句话在该大师思想体系里的位置"
+                  className="w-full px-3 py-2 rounded-md border text-sm outline-none focus:ring-2 transition-all resize-y"
+                  style={{ background: "var(--t-bg)", color: "var(--t-text)", borderColor: "var(--t-border)" }}
+                />
+              </Field>
+            </div>
           </div>
 
           <label className="flex items-center gap-2 text-sm cursor-pointer">

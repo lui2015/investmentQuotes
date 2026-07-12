@@ -526,3 +526,201 @@ export function deleteQuote(id: string): boolean {
   });
   return tx(id);
 }
+
+/**
+ * 解读编辑的 patch（与 Interpretation 形状一致，但所有字段可选）
+ *   - practice: 数组项数会被规范化（过滤空字符串）
+ *   - master_view: 空字符串会被规范化为 null
+ */
+export interface InterpretationPatch {
+  core?: string;
+  practice?: string[];
+  story?: string;
+  master_view?: string | null;
+}
+
+/**
+ * 写入或更新某条名言的解读（quote_id 为主键，存在则更新、不存在则插入）。
+ *   - 不存在的父名言会被外键约束拒绝。
+ *   - 返回最终落库的完整 Interpretation。
+ */
+export function upsertQuoteInterpretation(
+  quoteId: string,
+  patch: InterpretationPatch,
+): Interpretation | null {
+  ensureDb();
+  const db = initDb();
+
+  const existing = db
+    .prepare(
+      `SELECT quote_id, core, practice, story, master_view
+       FROM quote_interpretations WHERE quote_id = ?`,
+    )
+    .get(quoteId) as
+    | {
+        quote_id: string;
+        core: string;
+        practice: string;
+        story: string;
+        master_view: string | null;
+      }
+    | undefined;
+
+  const nextCore = patch.core !== undefined ? patch.core.trim() : existing?.core ?? "";
+  const nextPracticeArr =
+    patch.practice !== undefined
+      ? patch.practice.map((s) => s.trim()).filter((s) => s.length > 0)
+      : (() => {
+          if (!existing) return [] as string[];
+          try {
+            const parsed = JSON.parse(existing.practice);
+            if (Array.isArray(parsed)) return parsed.map((v) => String(v));
+          } catch {
+            /* fall through */
+          }
+          return existing.practice ? [existing.practice] : [];
+        })();
+  const nextStory =
+    patch.story !== undefined ? patch.story.trim() : existing?.story ?? "";
+  const nextMasterView =
+    patch.master_view !== undefined
+      ? (patch.master_view ?? "").trim()
+        ? (patch.master_view ?? "").trim()
+        : null
+      : existing?.master_view ?? null;
+
+  if (!existing) {
+    // 新建：4 个字段都必须非空（master_view 可空），与原表 NOT NULL 约束保持一致
+    if (!nextCore || nextPracticeArr.length === 0 || !nextStory) {
+      return null;
+    }
+    db.prepare(
+      `INSERT INTO quote_interpretations (quote_id, core, practice, story, master_view)
+       VALUES (?, ?, ?, ?, ?)`,
+    ).run(quoteId, nextCore, JSON.stringify(nextPracticeArr), nextStory, nextMasterView);
+  } else {
+    db.prepare(
+      `UPDATE quote_interpretations
+       SET core = ?, practice = ?, story = ?, master_view = ?
+       WHERE quote_id = ?`,
+    ).run(
+      nextCore,
+      JSON.stringify(nextPracticeArr),
+      nextStory,
+      nextMasterView,
+      quoteId,
+    );
+  }
+
+  return getQuoteInterpretation(quoteId);
+}
+
+/**
+ * 导出用：一次查询拿所有名言 + 解读（避免 N+1）。
+ * 返回扁平数组，每条含 quote 字段和 interpretation 字段（可为 null）。
+ */
+export interface QuoteExportRow extends Quote {
+  interpretation: Interpretation | null;
+}
+
+export function getAllQuotesWithInterpretations(): QuoteExportRow[] {
+  ensureDb();
+  const db = initDb();
+
+  const rows = db
+    .prepare(`
+      SELECT
+        q.id, q.content_cn, q.content_en, q.master_id,
+        q.source, q.source_year, q.is_featured, q.favorite_count, q.created_at,
+        m.name_cn as master_name_cn, m.name_en as master_name_en,
+        m.title as master_title, m.category as master_category,
+        m.avatar_url as master_avatar_url,
+        i.core, i.practice, i.story, i.master_view
+      FROM quotes q
+      JOIN masters m ON q.master_id = m.id
+      LEFT JOIN quote_interpretations i ON i.quote_id = q.id
+      ORDER BY q.is_featured DESC, q.favorite_count DESC, q.created_at DESC
+    `)
+    .all() as Array<{
+      id: string;
+      content_cn: string;
+      content_en: string | null;
+      master_id: string;
+      source: string | null;
+      source_year: number | null;
+      is_featured: number;
+      favorite_count: number;
+      created_at: string;
+      master_name_cn: string;
+      master_name_en: string | null;
+      master_title: string | null;
+      master_category: string | null;
+      master_avatar_url: string | null;
+      core: string | null;
+      practice: string | null;
+      story: string | null;
+      master_view: string | null;
+    }>;
+
+  // 批量查 tags（按 quote_id 分组）
+  const tagRows = db
+    .prepare(
+      `SELECT qt.quote_id, t.id, t.name, t.slug, t.description
+       FROM quote_tags qt
+       JOIN tags t ON qt.tag_id = t.id`,
+    )
+    .all() as Array<{
+      quote_id: string;
+      id: string;
+      name: string;
+      slug: string;
+      description: string;
+    }>;
+  const tagsByQuote = new Map<string, Tag[]>();
+  for (const r of tagRows) {
+    if (!tagsByQuote.has(r.quote_id)) tagsByQuote.set(r.quote_id, []);
+    tagsByQuote.get(r.quote_id)!.push({
+      id: r.id,
+      name: r.name,
+      slug: r.slug,
+      description: r.description,
+    });
+  }
+
+  return rows.map((r) => {
+    const quote: Quote = {
+      id: r.id,
+      content_cn: r.content_cn,
+      content_en: r.content_en,
+      master_id: r.master_id,
+      source: r.source,
+      source_year: r.source_year,
+      is_featured: r.is_featured,
+      favorite_count: r.favorite_count,
+      created_at: r.created_at,
+      master_name_cn: r.master_name_cn,
+      master_name_en: r.master_name_en ?? undefined,
+      master_title: r.master_title ?? undefined,
+      master_category: r.master_category ?? undefined,
+      master_avatar_url: r.master_avatar_url ?? undefined,
+      tags: tagsByQuote.get(r.id) ?? [],
+    };
+    const interp: Interpretation | null =
+      r.core === null
+        ? null
+        : {
+            core: r.core ?? "",
+            practice: (() => {
+              try {
+                const parsed = JSON.parse(r.practice ?? "[]");
+                return Array.isArray(parsed) ? parsed.map((v: unknown) => String(v)) : [];
+              } catch {
+                return r.practice ? [r.practice] : [];
+              }
+            })(),
+            story: r.story ?? "",
+            master_view: r.master_view ?? null,
+          };
+    return { ...quote, interpretation: interp };
+  });
+}
