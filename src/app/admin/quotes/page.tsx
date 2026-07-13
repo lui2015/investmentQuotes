@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { withBasePath } from "@/lib/basePath";
-import { usePathname } from "next/navigation";
 import type { Interpretation, Quote } from "@/lib/queries";
 
 interface ListResponse {
@@ -28,7 +27,6 @@ interface Toast {
 }
 
 export default function AdminQuotesPage() {
-  const pathname = usePathname();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -58,23 +56,40 @@ export default function AdminQuotesPage() {
     exportingRef.current = true;
     pushToast("info", "正在生成 Excel…");
     try {
-      const url = new URL(window.location.href);
-      url.pathname = withBasePath(pathname);
-      url.searchParams.set("export", "xlsx");
-      // 直接通过 <a download> 触发，避免 fetch 拦截
+      // 通过 fetch 获取 blob，再本地触发下载，避免代理返回 HTML
+      const res = await fetch(withBasePath("/api/admin/quotes?export=xlsx"));
+      if (!res.ok) {
+        pushToast("error", `导出失败 (${res.status})`);
+        return;
+      }
+      const ct = res.headers.get("content-type") ?? "";
+      if (!ct.includes("spreadsheetml")) {
+        pushToast("error", "导出失败：返回内容不是 Excel");
+        return;
+      }
+      const blob = await res.blob();
+      // 从响应头解析文件名，缺省则用日期
+      const disposition = res.headers.get("content-disposition") ?? "";
+      const match = disposition.match(/filename=([^;]+)/);
+      const filename = match
+        ? match[1].trim().replace(/["']/g, "")
+        : `quotes_${new Date().toISOString().slice(0, 10).replace(/-/g, "")}.xlsx`;
+
+      const objectUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url.toString();
-      a.download = "";
+      a.href = objectUrl;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+      URL.revokeObjectURL(objectUrl);
       pushToast("success", "已开始下载");
     } catch {
       pushToast("error", "导出失败");
     } finally {
       exportingRef.current = false;
     }
-  }, [pathname, pushToast]);
+  }, [pushToast]);
 
   const loadMasters = useCallback(async () => {
     try {
