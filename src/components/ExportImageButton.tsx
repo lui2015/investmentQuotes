@@ -314,8 +314,8 @@ const QuotePoster = forwardRef<
   const enLineClamp = en.length > 220 ? 3 : en.length > 120 ? 3 : 2;
   const enFontSize = en.length > 220 ? 26 : 30;
 
-  // 核心解读裁剪到 4 行
-  const coreText = interp?.core || "";
+  // 核心解读裁剪到 4 行（去掉 markdown 加粗标记 **）
+  const coreText = (interp?.core || "").replace(/\*\*/g, "");
   const coreLineClamp = coreText.length > 140 ? 4 : 3;
   const coreFontSize = coreText.length > 100 ? 26 : 28;
 
