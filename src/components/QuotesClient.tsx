@@ -78,18 +78,18 @@ export function QuotesClient({
   return (
     <>
       {/* Tab 栏 */}
-      <div className="flex gap-1 mb-10 p-1 rounded-xl w-fit" style={{ background: "var(--t-bg-tag)" }}>
+      <div className="flex gap-1 mb-8 md:mb-10 p-1 rounded-xl w-full sm:w-fit" style={{ background: "var(--t-bg-tag)" }}>
         {tabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className="px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-200"
+            className="flex-1 sm:flex-none px-2 sm:px-5 py-2.5 rounded-lg font-medium text-sm whitespace-nowrap transition-all duration-200"
             style={{
               background: tab === t.key ? "var(--t-accent)" : "transparent",
               color: tab === t.key ? "var(--t-bg)" : "var(--t-text-secondary)",
             }}
           >
-            <span className="mr-1.5">{t.icon}</span>
+            <span className="mr-1 sm:mr-1.5">{t.icon}</span>
             {t.label}
           </button>
         ))}

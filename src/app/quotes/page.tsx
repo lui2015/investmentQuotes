@@ -15,10 +15,10 @@ export default function QuotesPage() {
   const masters = getAllMasters();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: "var(--t-text)" }}>名言库</h1>
-        <p className="text-lg" style={{ color: "var(--t-text-secondary)" }}>投资名言 · 大师智慧 · 主题分类</p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-4xl font-bold mb-2 md:mb-4" style={{ color: "var(--t-text)" }}>名言库</h1>
+        <p className="text-base md:text-lg" style={{ color: "var(--t-text-secondary)" }}>投资名言 · 大师智慧 · 主题分类</p>
       </div>
       <QuotesClient initialQuotes={quotes} tags={tags} masters={masters} />
     </div>

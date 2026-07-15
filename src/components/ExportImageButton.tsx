@@ -234,7 +234,7 @@ export function ExportImageButton({ quote, interp }: Props) {
         onClick={handleExport}
         disabled={status === "rendering"}
         title="导出为精美图片，适合发抖音 / 小红书"
-        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
+        className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-all hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
         style={{
           background: "var(--t-bg-tag)",
           color: "var(--t-text)",
