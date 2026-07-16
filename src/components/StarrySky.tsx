@@ -35,8 +35,8 @@ function truncate(text: string, max = 16): string {
 export function StarrySky({ quotes, onExit }: { quotes: Quote[]; onExit: () => void }) {
   const [isMobile, setIsMobile] = useState(false);
   const [canHover, setCanHover] = useState(true);
-  // 当前选中（hover / 轻触）的名言，完整内容展示在底部固定卡片中
-  const [active, setActive] = useState<Quote | null>(null);
+  // 当前选中（hover / 轻触）的名言：卡片锚定到该星星所在位置浮现，跟随名言移动
+  const [active, setActive] = useState<{ q: Quote; x: number; y: number } | null>(null);
 
   useEffect(() => {
     const mqMobile = window.matchMedia("(max-width: 640px)");
@@ -105,7 +105,8 @@ export function StarrySky({ quotes, onExit }: { quotes: Quote[]; onExit: () => v
   }, [isMobile]);
 
   // 与星星交互：桌面 hover 即选中；触屏轻触选中（不直接跳转，先看完整名言）
-  const pick = (q: Quote) => setActive(q);
+  // 记录星星坐标，卡片据此锚定浮现
+  const pick = (q: Quote, x: number, y: number) => setActive({ q, x, y });
 
   return (
     <div className="starry-overlay fixed inset-0 z-[60] overflow-hidden" role="dialog" aria-label="繁星模式">
@@ -159,11 +160,11 @@ export function StarrySky({ quotes, onExit }: { quotes: Quote[]; onExit: () => v
           key={s.q.id}
           type="button"
           aria-label={s.q.content_cn}
-          onMouseEnter={canHover ? () => pick(s.q) : undefined}
-          onFocus={() => pick(s.q)}
-          onClick={() => pick(s.q)}
+          onMouseEnter={canHover ? () => pick(s.q, s.x, s.y) : undefined}
+          onFocus={() => pick(s.q, s.x, s.y)}
+          onClick={() => pick(s.q, s.x, s.y)}
           className={`starry-star${s.labeled ? " starry-star--float" : " starry-star--dot"}${
-            active?.id === s.q.id ? " starry-star--active" : ""
+            active?.q.id === s.q.id ? " starry-star--active" : ""
           }`}
           style={
             {
@@ -188,39 +189,46 @@ export function StarrySky({ quotes, onExit }: { quotes: Quote[]; onExit: () => v
         </button>
       ))}
 
-      {/* 底部固定名言卡片：完整展示当前选中名言，永不被裁剪/变形，移动端亦可用 */}
-      <div className={`starry-card${active ? " is-open" : ""}`} role="status" aria-live="polite">
-        {active ? (
-          <>
-            <button
-              type="button"
-              className="starry-card-close"
-              aria-label="关闭"
-              onClick={() => setActive(null)}
-            >
-              ×
-            </button>
-            <p className="starry-card-quote">{active.content_cn}</p>
-            {active.content_en && <p className="starry-card-en">{active.content_en}</p>}
-            <div className="starry-card-foot">
-              <span className="starry-card-author">
-                {active.master_name_cn}
-                {active.master_title ? ` · ${active.master_title}` : ""}
-              </span>
-              <Link href={`/quotes/${active.id}`} className="starry-card-link">
-                查看详情
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
-          </>
-        ) : (
-          <p className="starry-card-hint">
-            {canHover ? "悬停任意一颗星，名言在此浮现" : "轻触任意一颗星，名言在此浮现"}
-          </p>
-        )}
-      </div>
+      {/* 名言卡片：锚定到选中星星所在位置浮现，跟随名言变化位置；
+          自动依据星星在上/下半屏翻转，并做视口内水平钳制，绝不被裁剪/变形 */}
+      {active && (
+        <div
+          className={`starry-card is-open ${active.y > 52 ? "starry-card--above" : "starry-card--below"}`}
+          role="status"
+          aria-live="polite"
+          style={{ "--card-x": `${active.x}%`, "--card-y": `${active.y}%` } as React.CSSProperties}
+        >
+          <button
+            type="button"
+            className="starry-card-close"
+            aria-label="关闭"
+            onClick={() => setActive(null)}
+          >
+            ×
+          </button>
+          <p className="starry-card-quote">{active.q.content_cn}</p>
+          {active.q.content_en && <p className="starry-card-en">{active.q.content_en}</p>}
+          <div className="starry-card-foot">
+            <span className="starry-card-author">
+              {active.q.master_name_cn}
+              {active.q.master_title ? ` · ${active.q.master_title}` : ""}
+            </span>
+            <Link href={`/quotes/${active.q.id}`} className="starry-card-link">
+              查看详情
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* 未选中时的引导提示（固定底部居中，不遮挡星空） */}
+      {!active && (
+        <p className="starry-card-hint" role="status" aria-live="polite">
+          {canHover ? "悬停任意一颗星，名言在此浮现" : "轻触任意一颗星，名言在此浮现"}
+        </p>
+      )}
     </div>
   );
 }

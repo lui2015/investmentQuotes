@@ -517,28 +517,34 @@ body {
   text-shadow: 0 0 10px rgba(0,0,0,0.6), 0 0 18px currentColor;
 }
 
-/* 底部固定名言卡片：完整展示选中名言，永不被裁剪/缩放变形，移动端友好 */
+/* 名言卡片：锚定到选中星星坐标浮现，随名言移动；水平钳制在视口内，
+   依据星星在上/下半屏自动翻转到下方/上方，完整展示、永不被裁剪或变形 */
 .starry-card {
-  position: fixed;
-  left: 50%;
-  bottom: 1.5rem;
-  transform: translateX(-50%) translateY(12px);
+  position: absolute;
+  left: clamp(min(46vw, 21rem), var(--card-x, 50%), calc(100% - min(46vw, 21rem)));
+  top: var(--card-y, 50%);
   width: min(92vw, 42rem);
   z-index: 63;
   padding: 1rem 1.15rem 0.95rem;
   border-radius: 1rem;
-  background: rgba(10, 14, 26, 0.9);
+  background: rgba(10, 14, 26, 0.92);
   border: 1px solid var(--t-accent, rgba(255, 255, 255, 0.16));
   box-shadow: 0 20px 50px -16px rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(10px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.starry-card.is-open {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
   pointer-events: auto;
+  animation: starryCardIn 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* 星星在上半屏 -> 卡片浮现在其下方 */
+.starry-card--below {
+  transform: translate(-50%, 1.4rem);
+}
+/* 星星在下半屏 -> 卡片浮现在其上方 */
+.starry-card--above {
+  transform: translate(-50%, calc(-100% - 1.4rem));
+}
+@keyframes starryCardIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .starry-card-quote {
   font-size: 1rem;
@@ -583,10 +589,21 @@ body {
 .starry-card-link:hover {
   transform: translateX(2px);
 }
+/* 未选中时的固定底部引导提示 */
 .starry-card-hint {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+  z-index: 63;
+  padding: 0.5rem 1.05rem;
+  border-radius: 9999px;
+  background: rgba(10, 14, 26, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
   font-size: 0.85rem;
-  text-align: center;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.55);
+  pointer-events: none;
 }
 .starry-card-close {
   position: absolute;
@@ -610,10 +627,10 @@ body {
 
 @media (max-width: 640px) {
   .starry-card {
-    bottom: 1rem;
     padding: 0.85rem 1rem;
   }
   .starry-card-quote { font-size: 0.94rem; }
+  .starry-card-hint { bottom: 1rem; }
 }
 
 /* 退出按钮 */
