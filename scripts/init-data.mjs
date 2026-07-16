@@ -79,15 +79,15 @@ const insertMastersSQL = `
 INSERT OR IGNORE INTO masters (id, name_cn, name_en, avatar_url, title, bio, born_year, nationality, category) VALUES
 ('m-buffett', '沃伦·巴菲特', 'Warren Buffett', '/avatars/buffett.png', '奥马哈先知', '伯克希尔·哈撒韦公司董事长兼CEO', 1930, '美国', '价值投资'),
 ('m-munger', '查理·芒格', 'Charlie Munger', '/avatars/munger.png', '多元思维模型大师', '伯克希尔·哈撒韦公司副董事长', 1924, '美国', '价值投资'),
-('m-graham', '本杰明·格雷厄姆', 'Benjamin Graham', NULL, '价值投资之父', '现代证券分析之父', 1894, '美国', '价值投资'),
-('m-lynch', '彼得·林奇', 'Peter Lynch', NULL, '传奇基金经理', '富达麦哲伦基金经理', 1944, '美国', '成长投资'),
-('m-soros', '乔治·索罗斯', 'George Soros', NULL, '金融巨鳄', '量子基金创始人', 1930, '美国', '宏观对冲'),
-('m-dalio', '瑞·达利欧', 'Ray Dalio', NULL, '原则先生', '桥水基金创始人', 1949, '美国', '宏观对冲'),
-('m-marks', '霍华德·马克斯', 'Howard Marks', NULL, '周期大师', '橡树资本联合创始人', 1946, '美国', '价值投资'),
+('m-graham', '本杰明·格雷厄姆', 'Benjamin Graham', '/avatars/graham.png', '价值投资之父', '现代证券分析之父', 1894, '美国', '价值投资'),
+('m-lynch', '彼得·林奇', 'Peter Lynch', '/avatars/lynch.png', '传奇基金经理', '富达麦哲伦基金经理', 1944, '美国', '成长投资'),
+('m-soros', '乔治·索罗斯', 'George Soros', '/avatars/soros.png', '金融巨鳄', '量子基金创始人', 1930, '美国', '宏观对冲'),
+('m-dalio', '瑞·达利欧', 'Ray Dalio', '/avatars/dalio.png', '原则先生', '桥水基金创始人', 1949, '美国', '宏观对冲'),
+('m-marks', '霍华德·马克斯', 'Howard Marks', '/avatars/marks.png', '周期大师', '橡树资本联合创始人', 1946, '美国', '价值投资'),
 ('m-bogle', '约翰·博格', 'John Bogle', NULL, '指数基金之父', '先锋集团创始人', 1929, '美国', '指数投资'),
 ('m-fisher', '菲利普·费雪', 'Philip Fisher', NULL, '成长投资先驱', '成长股投资策略的开创者', 1907, '美国', '成长投资'),
-('m-livermore', '杰西·利弗莫尔', 'Jesse Livermore', NULL, '华尔街传奇操盘手', '20世纪初最著名的股票交易员', 1877, '美国', '投机'),
-('m-taleb', '纳西姆·塔勒布', 'Nassim Taleb', NULL, '黑天鹅之父', '风险管理专家', 1960, '黎巴嫩', '风险管理'),
+('m-livermore', '杰西·利弗莫尔', 'Jesse Livermore', '/avatars/livermore.png', '华尔街传奇操盘手', '20世纪初最著名的股票交易员', 1877, '美国', '投机'),
+('m-taleb', '纳西姆·塔勒布', 'Nassim Taleb', '/avatars/taleb.png', '黑天鹅之父', '风险管理专家', 1960, '黎巴嫩', '风险管理'),
 ('m-klarman', '塞思·卡拉曼', 'Seth Klarman', NULL, '价值投资大师', 'Baupost基金掌门人', 1957, '美国', '价值投资');
 `;
 db.exec(insertMastersSQL);
@@ -96,6 +96,13 @@ db.exec(insertMastersSQL);
 const updateAvatarsSQL = `
 UPDATE masters SET avatar_url = '/avatars/buffett.png' WHERE id = 'm-buffett' AND avatar_url IS NULL;
 UPDATE masters SET avatar_url = '/avatars/munger.png' WHERE id = 'm-munger' AND avatar_url IS NULL;
+UPDATE masters SET avatar_url = '/avatars/graham.png' WHERE id = 'm-graham';
+UPDATE masters SET avatar_url = '/avatars/soros.png' WHERE id = 'm-soros';
+UPDATE masters SET avatar_url = '/avatars/marks.png' WHERE id = 'm-marks';
+UPDATE masters SET avatar_url = '/avatars/lynch.png' WHERE id = 'm-lynch';
+UPDATE masters SET avatar_url = '/avatars/dalio.png' WHERE id = 'm-dalio';
+UPDATE masters SET avatar_url = '/avatars/livermore.png' WHERE id = 'm-livermore';
+UPDATE masters SET avatar_url = '/avatars/taleb.png' WHERE id = 'm-taleb';
 `;
 db.exec(updateAvatarsSQL);
 
