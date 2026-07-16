@@ -329,6 +329,44 @@ body {
 }
 
 /* ============================================================
+   Topic (主题分类) 卡片 —— 单一 accent 主色，编辑式克制风格
+   ============================================================ */
+.topic-card {
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease, box-shadow 0.3s ease;
+}
+/* 幽灵序号：大号衬线数字，低透明度装饰 */
+.topic-index {
+  font-size: 3.75rem;
+  font-weight: 700;
+  opacity: 0.1;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.topic-badge {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease, background 0.3s ease;
+}
+.topic-explore svg {
+  transition: transform 0.3s ease;
+}
+.group:hover .topic-card {
+  transform: translateY(-6px);
+  border-color: var(--t-accent) !important;
+  box-shadow: 0 24px 48px -20px var(--t-shadow-color);
+}
+.group:hover .topic-index {
+  opacity: 0.2;
+  transform: translateY(2px);
+}
+.group:hover .topic-badge {
+  border-color: var(--t-accent);
+  transform: scale(1.06);
+}
+.group:hover .topic-explore svg {
+  transform: translateX(4px);
+}
+
+/* ============================================================
    Scrollbar
    ============================================================ */
 ::-webkit-scrollbar { width: 6px; }

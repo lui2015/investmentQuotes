@@ -17,38 +17,109 @@ const tagIcons: Record<string, string> = {
 
 export default function TopicsPage() {
   const tags = getAllTags();
+  const totalQuotes = tags.reduce((sum, t) => sum + (t.quote_count || 0), 0);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-12">
-        <h1 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: "var(--t-text)" }}>主题分类</h1>
-        <p className="text-lg max-w-2xl" style={{ color: "var(--t-text-secondary)" }}>
-          按投资思路分类探索大师智慧，找到你最需要的投资理念
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+      {/* 页头 —— 编辑式排版，克制大气 */}
+      <header className="mb-12 md:mb-16">
+        <div
+          className="inline-flex items-center gap-2 text-xs font-medium tracking-widest uppercase mb-5"
+          style={{ color: "var(--t-accent)" }}
+        >
+          <span className="inline-block w-8 h-px" style={{ background: "var(--t-accent)" }} />
+          Topics
+        </div>
+        <h1
+          className="text-4xl md:text-5xl font-bold tracking-tight mb-4"
+          style={{ color: "var(--t-text)" }}
+        >
+          主题分类
+        </h1>
+        <p className="text-base md:text-lg max-w-2xl leading-relaxed" style={{ color: "var(--t-text-secondary)" }}>
+          按投资思路分类探索大师智慧，找到你最需要的投资理念。
         </p>
-      </div>
+        <div
+          className="mt-6 flex items-center gap-2 text-sm"
+          style={{ color: "var(--t-text-muted)" }}
+        >
+          <span style={{ color: "var(--t-text-secondary)" }}>
+            <span className="font-bold" style={{ color: "var(--t-text)" }}>{tags.length}</span> 个主题
+          </span>
+          <span className="opacity-40">·</span>
+          <span style={{ color: "var(--t-text-secondary)" }}>
+            <span className="font-bold" style={{ color: "var(--t-text)" }}>{totalQuotes}</span> 条名言
+          </span>
+        </div>
+      </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {tags.map((tag) => (
-          <Link key={tag.id} href={`/topics/${tag.slug}`} className="block">
-            <div
-              className="card-hover overflow-hidden border h-full transition-colors duration-300"
-              style={{ background: "var(--t-bg-card)", borderColor: "var(--t-border)", borderRadius: "var(--t-radius)" }}
+      {/* 主题卡片网格 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+        {tags.map((tag, i) => (
+          <Link key={tag.id} href={`/topics/${tag.slug}`} className="group block h-full">
+            <article
+              className="topic-card relative h-full flex flex-col overflow-hidden border p-7"
+              style={{
+                background: "var(--t-bg-card)",
+                borderColor: "var(--t-border)",
+                borderRadius: "var(--t-radius)",
+              }}
             >
-              <div
-                className="p-6"
-                style={{ background: `linear-gradient(135deg, var(--t-avatar-from), var(--t-avatar-to))` }}
+              {/* 幽灵序号：大号衬线数字，编辑式装饰 */}
+              <span
+                className="topic-index pointer-events-none absolute top-3 right-5 font-serif leading-none select-none"
+                style={{ color: "var(--t-accent)" }}
+                aria-hidden
               >
-                <span className="text-4xl">{tagIcons[tag.name] || "💬"}</span>
+                {String(i + 1).padStart(2, "0")}
+              </span>
+
+              {/* 图标徽章：accent 微染，克制统一 */}
+              <div
+                className="topic-badge flex items-center justify-center w-14 h-14 mb-6 text-2xl"
+                style={{
+                  background: "var(--t-accent-bg)",
+                  border: "1px solid var(--t-border)",
+                  borderRadius: "calc(var(--t-radius) + 0.35rem)",
+                }}
+              >
+                {tagIcons[tag.name] || "💬"}
               </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-2" style={{ color: "var(--t-text)" }}>{tag.name}</h3>
-                <p className="text-sm mb-4 leading-relaxed" style={{ color: "var(--t-text-secondary)" }}>{tag.description}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium" style={{ color: "var(--t-accent)" }}>{tag.quote_count} 条名言</span>
-                  <span className="text-sm" style={{ color: "var(--t-text-muted)" }}>探索 →</span>
-                </div>
+
+              <h3 className="text-xl font-bold mb-2" style={{ color: "var(--t-text)" }}>
+                {tag.name}
+              </h3>
+              <p
+                className="text-sm leading-relaxed mb-7 flex-1"
+                style={{ color: "var(--t-text-secondary)" }}
+              >
+                {tag.description}
+              </p>
+
+              {/* 底部：条数统计 + 探索 */}
+              <div
+                className="flex items-center justify-between pt-4 border-t"
+                style={{ borderColor: "var(--t-border)" }}
+              >
+                <span className="inline-flex items-baseline gap-1">
+                  <span className="text-lg font-bold" style={{ color: "var(--t-accent)" }}>
+                    {tag.quote_count}
+                  </span>
+                  <span className="text-xs" style={{ color: "var(--t-text-muted)" }}>
+                    条名言
+                  </span>
+                </span>
+                <span
+                  className="topic-explore inline-flex items-center gap-1 text-sm font-semibold"
+                  style={{ color: "var(--t-accent)" }}
+                >
+                  探索
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </span>
               </div>
-            </div>
+            </article>
           </Link>
         ))}
       </div>
