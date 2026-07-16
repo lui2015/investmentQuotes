@@ -3,6 +3,7 @@
 import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import type { Quote, Interpretation } from "@/lib/queries";
+import { withBasePath } from "@/lib/basePath";
 
 interface Props {
   quote: Quote;
@@ -439,7 +440,7 @@ const QuotePoster = forwardRef<
           {hasAvatar ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={quote.master_avatar_url!}
+              src={withBasePath(quote.master_avatar_url!)}
               alt={quote.master_name_cn || ""}
               crossOrigin="anonymous"
               onError={() => setAvatarOk(false)}

@@ -263,6 +263,17 @@ export function seedData() {
   {
     const AVATAR_DEFAULTS: Record<string, string> = {
       "m-buffett": "/avatars/buffett.png",
+      "m-munger": "/avatars/munger.png",
+      "m-graham": "/avatars/graham.png",
+      "m-lynch": "/avatars/lynch.png",
+      "m-soros": "/avatars/soros.png",
+      "m-dalio": "/avatars/dalio.png",
+      "m-marks": "/avatars/marks.png",
+      "m-bogle": "/avatars/bogle.png",
+      "m-fisher": "/avatars/fisher.png",
+      "m-livermore": "/avatars/livermore.png",
+      "m-taleb": "/avatars/taleb.png",
+      "m-klarman": "/avatars/klarman.png",
     };
     const upsertAvatar = db.prepare(
       `UPDATE masters SET avatar_url = ? WHERE id = ? AND (avatar_url IS NULL OR avatar_url = '')`,
