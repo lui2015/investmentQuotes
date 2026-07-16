@@ -24,6 +24,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/src ./src
 COPY --from=builder /app/next.config.ts ./
 COPY --from=builder /app/tsconfig.json ./
-RUN mkdir -p data
+COPY --from=builder /app/scripts ./scripts
+RUN mkdir -p data && node scripts/init-data.mjs
 EXPOSE 3000
 CMD ["npx", "next", "start", "-p", "3000"]

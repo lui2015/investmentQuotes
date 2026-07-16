@@ -102,10 +102,10 @@ export default async function QuoteDetailPage({ params }: { params: Params }) {
         )}
       </article>
 
-      {interp && (
+        {interp && (
         <section className="mb-8 space-y-6">
           <Section icon="💡" title="核心解读" subtitle="这句话究竟在说什么">
-            <p className="text-base leading-loose" style={{ color: "var(--t-text)" }}>{interp.core}</p>
+            <p className="text-base leading-loose" style={{ color: "var(--t-text)" }}>{interp.core.replace(/\*\*/g, "")}</p>
           </Section>
 
           <Section icon="✅" title="应用实操" subtitle="给普通投资者的可执行清单">
