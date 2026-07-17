@@ -12,7 +12,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="zh-CN" data-theme="cyberpunk" suppressHydrationWarning>
+    <html lang="zh-CN" data-theme="fresh-green" suppressHydrationWarning>
+      <head>
+        {/* 在首屏绘制前同步设定主题，避免先黑后绿的闪烁 */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('iq-theme');var v=['classic','cyberpunk','ink','minimal','purple','fresh-green'];document.documentElement.setAttribute('data-theme',(t&&v.indexOf(t)>=0)?t:'fresh-green');}catch(e){document.documentElement.setAttribute('data-theme','fresh-green');}})();`,
+          }}
+        />
+      </head>
       <body className="antialiased min-h-screen flex flex-col">
         <ThemeProvider>
           <FavoritesProvider>
