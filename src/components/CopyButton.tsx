@@ -17,7 +17,7 @@ export function CopyButton({ quote }: { quote: Quote }) {
   return (
     <button
       onClick={handleCopy}
-      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all hover:scale-105"
+      className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium whitespace-nowrap shrink-0 transition-all hover:scale-105"
       style={{
         background: "var(--t-bg-tag)",
         color: "var(--t-text)",

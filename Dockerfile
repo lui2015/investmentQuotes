@@ -25,6 +25,7 @@ COPY --from=builder /app/src ./src
 COPY --from=builder /app/next.config.ts ./
 COPY --from=builder /app/tsconfig.json ./
 COPY --from=builder /app/scripts ./scripts
-RUN mkdir -p data && node scripts/init-data.mjs
+COPY --from=builder /app/entrypoint.sh ./entrypoint.sh
+RUN chmod +x entrypoint.sh && mkdir -p data
 EXPOSE 3000
-CMD ["npx", "next", "start", "-p", "3000"]
+ENTRYPOINT ["sh", "entrypoint.sh"]

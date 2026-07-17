@@ -3,6 +3,7 @@
 import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import type { Quote, Interpretation } from "@/lib/queries";
+import { withBasePath } from "@/lib/basePath";
 
 interface Props {
   quote: Quote;
@@ -234,7 +235,7 @@ export function ExportImageButton({ quote, interp }: Props) {
         onClick={handleExport}
         disabled={status === "rendering"}
         title="导出为精美图片，适合发抖音 / 小红书"
-        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
+        className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium whitespace-nowrap shrink-0 transition-all hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
         style={{
           background: "var(--t-bg-tag)",
           color: "var(--t-text)",
@@ -439,7 +440,7 @@ const QuotePoster = forwardRef<
           {hasAvatar ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={quote.master_avatar_url!}
+              src={withBasePath(quote.master_avatar_url!)}
               alt={quote.master_name_cn || ""}
               crossOrigin="anonymous"
               onError={() => setAvatarOk(false)}

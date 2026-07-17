@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { withBasePath } from "@/lib/basePath";
 
 interface Master {
   id: string;
@@ -76,8 +77,9 @@ export function FilterTabs({ masters, tags }: FilterTabsProps) {
                   }}
                 >
                   {master.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={master.avatar_url}
+                      src={withBasePath(master.avatar_url)}
                       alt={master.name_cn}
                       className="w-5 h-5 rounded-full object-cover"
                     />

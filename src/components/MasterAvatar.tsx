@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { BASE_PATH, withBasePath } from "@/lib/basePath";
 
 /**
  * 大师头像
@@ -9,6 +10,19 @@ import type { CSSProperties } from "react";
  * 传给 className，组件在 img 模式下会自动追加 `object-cover`，在 fallback 模式下
  * 自动追加 `flex items-center justify-center shrink-0`。
  */
+
+/**
+ * 头像资源解析：
+ * - 本地绝对路径（/avatars/xxx.png）需补上 basePath，否则在部署子路径下 404；
+ * - 外链（http/https、data:）与已含 basePath 的路径原样返回。
+ */
+function resolveAvatarSrc(url: string): string {
+  if (/^(https?:)?\/\//.test(url) || url.startsWith("data:")) return url;
+  if (!url.startsWith("/")) return url;
+  if (url === BASE_PATH || url.startsWith(`${BASE_PATH}/`)) return url;
+  return withBasePath(url);
+}
+
 export function MasterAvatar({
   name,
   avatarUrl,
@@ -22,8 +36,9 @@ export function MasterAvatar({
 }) {
   if (avatarUrl) {
     return (
+      // eslint-disable-next-line @next/next/no-img-element
       <img
-        src={avatarUrl}
+        src={resolveAvatarSrc(avatarUrl)}
         alt={name}
         className={`${className} object-cover`.trim()}
       />

@@ -49,6 +49,37 @@ export function QuotesClient({
 
   const filteredQuotes = selectedTag ? quotes.filter((q) => q.tags?.some((t) => t.id === selectedTag)) : quotes;
 
+  // ── 分页 ──
+  const PAGE_SIZE = 12;
+  const [page, setPage] = useState(1);
+  useEffect(() => { setPage(1); }, [search, selectedTag, quotes]);
+  const totalPages = Math.max(1, Math.ceil(filteredQuotes.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pagedQuotes = filteredQuotes.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  const pageNumbers = useMemo(() => {
+    const pages: (number | "…")[] = [];
+    const push = (n: number | "…") => pages.push(n);
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) push(i);
+    } else {
+      push(1);
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+      if (start > 2) push("…");
+      for (let i = start; i <= end; i++) push(i);
+      if (end < totalPages - 1) push("…");
+      push(totalPages);
+    }
+    return pages;
+  }, [totalPages, currentPage]);
+
+  const goToPage = (p: number) => {
+    const next = Math.min(Math.max(1, p), totalPages);
+    setPage(next);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   // ── 大师搜索 ──
   const [masterSearch, setMasterSearch] = useState("");
   const filteredMasters = useMemo(() => {
@@ -78,18 +109,18 @@ export function QuotesClient({
   return (
     <>
       {/* Tab 栏 */}
-      <div className="flex gap-1 mb-10 p-1 rounded-xl w-fit" style={{ background: "var(--t-bg-tag)" }}>
+      <div className="flex gap-1 mb-8 md:mb-10 p-1 rounded-xl w-full sm:w-fit" style={{ background: "var(--t-bg-tag)" }}>
         {tabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className="px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-200"
+            className="flex-1 sm:flex-none px-2 sm:px-5 py-2.5 rounded-lg font-medium text-sm whitespace-nowrap transition-all duration-200"
             style={{
               background: tab === t.key ? "var(--t-accent)" : "transparent",
               color: tab === t.key ? "var(--t-bg)" : "var(--t-text-secondary)",
             }}
           >
-            <span className="mr-1.5">{t.icon}</span>
+            <span className="mr-1 sm:mr-1.5">{t.icon}</span>
             {t.label}
           </button>
         ))}
@@ -152,7 +183,7 @@ export function QuotesClient({
           <p className="text-sm mb-6" style={{ color: "var(--t-text-muted)" }}>{filteredQuotes.length} 条名言</p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredQuotes.map((quote) => {
+            {pagedQuotes.map((quote) => {
               const favorited = hydrated && isFavorite(quote.id);
               return (
                 <Link key={quote.id} href={`/quotes/${quote.id}`} className="block">
@@ -207,6 +238,49 @@ export function QuotesClient({
               );
             })}
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center flex-wrap gap-2 mt-10">
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ background: "var(--t-bg-tag)", color: "var(--t-tag-text)" }}
+                aria-label="上一页"
+              >
+                ‹ 上一页
+              </button>
+
+              {pageNumbers.map((p, i) =>
+                p === "…" ? (
+                  <span key={`ellipsis-${i}`} className="px-2 text-sm" style={{ color: "var(--t-text-muted)" }}>…</span>
+                ) : (
+                  <button
+                    key={p}
+                    onClick={() => goToPage(p)}
+                    className="min-w-[2.5rem] px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                    style={{
+                      background: p === currentPage ? "var(--t-accent)" : "var(--t-bg-tag)",
+                      color: p === currentPage ? "var(--t-bg)" : "var(--t-tag-text)",
+                    }}
+                    aria-current={p === currentPage ? "page" : undefined}
+                  >
+                    {p}
+                  </button>
+                )
+              )}
+
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ background: "var(--t-bg-tag)", color: "var(--t-tag-text)" }}
+                aria-label="下一页"
+              >
+                下一页 ›
+              </button>
+            </div>
+          )}
 
           {filteredQuotes.length === 0 && (
             <div className="text-center py-16">

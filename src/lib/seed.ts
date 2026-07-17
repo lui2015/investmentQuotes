@@ -1,5 +1,6 @@
 import { initDb } from "./db";
 import { v4 } from "./uuid";
+import { normalizeText } from "./similarity";
 
 const masters = [
   {
@@ -120,6 +121,16 @@ const masters = [
     bio: "波士顿Baupost基金创始人，著有投资经典《安全边际》。坚守格雷厄姆式的价值投资理念，注重风险控制和安全边际，是当代最受尊敬的价值投资者之一。",
     born_year: 1957,
     nationality: "美国",
+    category: "价值投资",
+  },
+  {
+    id: "m-duan",
+    name_cn: "段永平",
+    name_en: "Duan Yongping",
+    title: "大道至简的投资家",
+    bio: "步步高、OPPO、vivo 背后的创始人，网易、苹果、茅台的长期重仓投资者。2006 年以 62 万美元拍下巴菲特慈善午餐。信奉巴菲特式价值投资，强调「本分」「平常心」与「做对的事」，是中国最具影响力的价值投资者之一。",
+    born_year: 1961,
+    nationality: "中国",
     category: "价值投资",
   },
 ];
@@ -255,6 +266,16 @@ const quotes = [
   { id: v4(), content_cn: "耐心是价值投资者最宝贵的资产。", content_en: "Patience is one of the most valuable assets a value investor can have.", master_id: "m-klarman", source: "安全边际", source_year: 1991, is_featured: 0, tags: ["t-value", "t-longterm", "t-mindset"] },
 ];
 
+// 段永平经典名言：使用固定 id（q-duan-*）以保证生产库自愈时幂等，不会重复插入
+const duanQuotes = [
+  { id: "q-duan-1", content_cn: "做对的事情，然后把事情做对。", content_en: "Do the right things, and do things right.", master_id: "m-duan", source: "段永平投资问答", source_year: null, is_featured: 1, tags: ["t-philosophy", "t-mindset"] },
+  { id: "q-duan-2", content_cn: "买股票就是买公司，买公司就是买它未来现金流的折现。", content_en: "Buying a stock is buying a business, and buying a business is buying the discounted value of its future cash flows.", master_id: "m-duan", source: "段永平投资问答", source_year: null, is_featured: 1, tags: ["t-value", "t-business"] },
+  { id: "q-duan-3", content_cn: "本分和平常心，是投资中最重要的两件事。", content_en: "Integrity and an ordinary mind are the two most important things in investing.", master_id: "m-duan", source: "段永平投资问答", source_year: null, is_featured: 1, tags: ["t-mindset", "t-philosophy"] },
+  { id: "q-duan-4", content_cn: "不为清单往往比要做的清单更重要。", content_en: "A stop-doing list is often more important than a to-do list.", master_id: "m-duan", source: "段永平投资问答", source_year: null, is_featured: 0, tags: ["t-mindset"] },
+  { id: "q-duan-5", content_cn: "如果不了解一家公司，再便宜也不要买。", content_en: "If you don't understand a company, don't buy it no matter how cheap it is.", master_id: "m-duan", source: "段永平投资问答", source_year: null, is_featured: 0, tags: ["t-circle", "t-value"] },
+  { id: "q-duan-6", content_cn: "平常心就是回到事物的本质去思考问题。", content_en: "An ordinary mind means going back to the essence of things when you think.", master_id: "m-duan", source: "段永平投资问答", source_year: null, is_featured: 0, tags: ["t-mindset", "t-market"] },
+];
+
 export function seedData() {
   const db = initDb();
 
@@ -263,6 +284,18 @@ export function seedData() {
   {
     const AVATAR_DEFAULTS: Record<string, string> = {
       "m-buffett": "/avatars/buffett.png",
+      "m-munger": "/avatars/munger.png",
+      "m-graham": "/avatars/graham.png",
+      "m-lynch": "/avatars/lynch.png",
+      "m-soros": "/avatars/soros.png",
+      "m-dalio": "/avatars/dalio.png",
+      "m-marks": "/avatars/marks.png",
+      "m-bogle": "/avatars/bogle.png",
+      "m-fisher": "/avatars/fisher.png",
+      "m-livermore": "/avatars/livermore.png",
+      "m-taleb": "/avatars/taleb.png",
+      "m-klarman": "/avatars/klarman.png",
+      "m-duan": "/avatars/duan.png",
     };
     const upsertAvatar = db.prepare(
       `UPDATE masters SET avatar_url = ? WHERE id = ? AND (avatar_url IS NULL OR avatar_url = '')`,
@@ -270,6 +303,66 @@ export function seedData() {
     for (const [id, url] of Object.entries(AVATAR_DEFAULTS)) {
       upsertAvatar.run(url, id);
     }
+  }
+
+  // 大师自愈：确保后续新增的大师在「已有数据」的生产库里也能补齐（idempotent，幂等）。
+  // 因为下方 masterCount>0 会直接 return，新增大师无法走完整 seed，必须在此显式幂等插入。
+  {
+    const extraMasters = masters.filter((m) => m.id === "m-duan");
+    const upsertMaster = db.prepare(
+      `INSERT OR IGNORE INTO masters (id, name_cn, name_en, title, bio, born_year, nationality, category, avatar_url)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    );
+    const upsertQuote = db.prepare(
+      `INSERT OR IGNORE INTO quotes (id, content_cn, content_en, master_id, source, source_year, is_featured)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    );
+    const upsertQuoteTag = db.prepare(
+      `INSERT OR IGNORE INTO quote_tags (quote_id, tag_id) VALUES (?, ?)`,
+    );
+    const selfHeal = db.transaction(() => {
+      for (const m of extraMasters) {
+        upsertMaster.run(m.id, m.name_cn, m.name_en, m.title, m.bio, m.born_year, m.nationality, m.category, `/avatars/${m.id.replace("m-", "")}.png`);
+      }
+      // 段永平经典名言（固定 id 以保证幂等，不会重复插入）
+      for (const q of duanQuotes) {
+        upsertQuote.run(q.id, q.content_cn, q.content_en, q.master_id, q.source, q.source_year, q.is_featured);
+        for (const tagId of q.tags) {
+          upsertQuoteTag.run(q.id, tagId);
+        }
+      }
+    });
+    selfHeal();
+  }
+
+  // 大师去重自愈：合并「同名但不同 id」的重复大师（idempotent，幂等）。
+  // 场景：用户提交名言时若没匹配到规范种子大师，会新建 user-submitted 大师（无头像），
+  // 导致库里出现多个同名大师（如「段永平」既有种子 m-duan 又有 user 新建者），
+  // 表现为部分卡片有头像、部分没有。此处把重复大师的名言迁移到规范种子大师，再删除重复大师。
+  {
+    const allMasters = db
+      .prepare("SELECT id, name_cn FROM masters")
+      .all() as { id: string; name_cn: string }[];
+    const moveQuotes = db.prepare("UPDATE quotes SET master_id = ? WHERE master_id = ?");
+    const clearMatchedMaster = db.prepare(
+      "UPDATE quote_submissions SET matched_master_id = ? WHERE matched_master_id = ?",
+    );
+    const deleteMaster = db.prepare("DELETE FROM masters WHERE id = ?");
+    const dedup = db.transaction(() => {
+      for (const canonical of masters) {
+        const canonNorm = normalizeText(canonical.name_cn);
+        if (!canonNorm) continue;
+        for (const m of allMasters) {
+          if (m.id === canonical.id) continue;
+          if (normalizeText(m.name_cn) === canonNorm) {
+            moveQuotes.run(canonical.id, m.id);
+            clearMatchedMaster.run(canonical.id, m.id);
+            deleteMaster.run(m.id);
+          }
+        }
+      }
+    });
+    dedup();
   }
 
   const masterCount = (db.prepare("SELECT COUNT(*) as count FROM masters").get() as { count: number }).count;

@@ -29,26 +29,26 @@ export default async function QuoteDetailPage({ params }: { params: Params }) {
   const interp = getQuoteInterpretation(quote.id);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <nav className="mb-8 text-sm" style={{ color: "var(--t-text-muted)" }}>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-12">
+      <nav className="mb-5 md:mb-8 text-sm" style={{ color: "var(--t-text-muted)" }}>
         <Link href="/">首页</Link><span className="mx-2">/</span>
         <Link href="/quotes">名言库</Link><span className="mx-2">/</span>
         <span style={{ color: "var(--t-text)" }}>名言详情</span>
       </nav>
 
       <article
-        className="p-8 md:p-12 border mb-8 transition-colors duration-300"
+        className="p-5 sm:p-8 md:p-12 border mb-8 transition-colors duration-300"
         style={{ background: "var(--t-bg-card)", borderColor: "var(--t-border)", borderRadius: "calc(var(--t-radius) * 1.5)" }}
       >
-        <div className="text-5xl mb-6 leading-none" style={{ color: "var(--t-accent)" }}>&ldquo;</div>
+        <div className="text-4xl md:text-5xl mb-4 md:mb-6 leading-none" style={{ color: "var(--t-accent)" }}>&ldquo;</div>
 
-        <blockquote className="quote-text text-2xl md:text-3xl font-medium leading-relaxed mb-6" style={{ color: "var(--t-text)" }}>
+        <blockquote className="quote-text text-xl sm:text-2xl md:text-3xl font-medium leading-relaxed mb-5 md:mb-6" style={{ color: "var(--t-text)" }}>
           {quote.content_cn}
         </blockquote>
 
         {quote.content_en && (
           <p
-            className="text-lg italic leading-relaxed mb-8 pl-4 border-l-2"
+            className="text-base md:text-lg italic leading-relaxed mb-6 md:mb-8 pl-4 border-l-2"
             style={{ color: "var(--t-text-muted)", borderColor: "var(--t-accent)" }}
           >
             {quote.content_en}
@@ -57,21 +57,21 @@ export default async function QuoteDetailPage({ params }: { params: Params }) {
 
         <div className="border-t pt-6 mt-6" style={{ borderColor: "var(--t-border)" }}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <Link href={`/masters/${quote.master_id}`} className="flex items-center gap-4 group">
+            <Link href={`/masters/${quote.master_id}`} className="flex items-center gap-3 md:gap-4 group">
               <MasterAvatar
                 name={quote.master_name_cn || ""}
                 avatarUrl={quote.master_avatar_url}
-                className="w-14 h-14 rounded-full text-white font-bold text-xl shadow-lg"
+                className="w-12 h-12 md:w-14 md:h-14 rounded-full text-white font-bold text-lg md:text-xl shadow-lg shrink-0"
               />
-              <div>
-                <div className="font-bold text-lg group-hover:underline" style={{ color: "var(--t-text)" }}>
+              <div className="min-w-0">
+                <div className="font-bold text-base md:text-lg group-hover:underline" style={{ color: "var(--t-text)" }}>
                   {quote.master_name_cn}
                   <span className="text-sm font-normal ml-2" style={{ color: "var(--t-text-muted)" }}>{quote.master_name_en}</span>
                 </div>
                 <div className="text-sm" style={{ color: "var(--t-text-secondary)" }}>{quote.master_title} · {quote.master_category}</div>
               </div>
             </Link>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 sm:justify-end">
               <FavoriteButton quoteId={quote.id} />
               <ExportImageButton quote={quote} interp={interp} />
               <CopyButton quote={quote} />

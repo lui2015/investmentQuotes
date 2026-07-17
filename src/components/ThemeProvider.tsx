@@ -8,11 +8,12 @@ export const THEMES = [
   { id: "ink", name: "水墨丹青", icon: "🖌️", desc: "古朴意韵" },
   { id: "minimal", name: "极简主义", icon: "◻️", desc: "纯净克制" },
   { id: "purple", name: "暗夜星辰", icon: "🔮", desc: "神秘深邃" },
+  { id: "fresh-green", name: "清新绿", icon: "🌿", desc: "清爽自然" },
 ] as const;
 
 export type ThemeId = (typeof THEMES)[number]["id"];
 
-const DEFAULT_THEME: ThemeId = "cyberpunk";
+const DEFAULT_THEME: ThemeId = "fresh-green";
 
 const ThemeContext = createContext<{
   theme: ThemeId;

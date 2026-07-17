@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { getDailyQuote, getLatestQuotes } from "@/lib/queries";
+import { getDailyQuote, getLatestQuotes, getAllQuotes } from "@/lib/queries";
 import { FeedQuoteCard } from "@/components/FeedQuoteCard";
 import { MasterAvatar } from "@/components/MasterAvatar";
+import { HomeModeShell } from "@/components/HomeModeShell";
 
 export const dynamic = "force-dynamic";
 
@@ -27,8 +28,16 @@ export default function HomePage() {
   const weekDays = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
   const dateStr = `${today.getFullYear()}年${String(today.getMonth() + 1).padStart(2, "0")}月${String(today.getDate()).padStart(2, "0")}日 · ${weekDays[today.getDay()]}`;
 
+  // 繁星模式的名言集合：用上名言库中「所有」名言，铺满整个星空
+  // getAllQuotes 已按 is_featured DESC, favorite_count DESC 排序，靠前的作为「亮星」常显文字
+  const allQuotes = getAllQuotes();
+  const starQuotes = daily
+    ? [daily, ...allQuotes.filter((q) => q.id !== daily.id)]
+    : allQuotes;
+
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+    <HomeModeShell starQuotes={starQuotes}>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
       {/* 今日推荐 */}
       {daily && (
         <section className="mb-10 md:mb-14">
@@ -145,43 +154,45 @@ export default function HomePage() {
         </p>
       </header>
 
-      {/* 信息流主体 */}
-      <div className="space-y-5 md:space-y-6">
-        {quotes.length === 0 ? (
-          <div
-            className="p-12 text-center border"
-            style={{
-              background: "var(--t-bg-card)",
-              borderColor: "var(--t-border)",
-              borderRadius: "var(--t-radius)",
-            }}
-          >
-            <p style={{ color: "var(--t-text-secondary)" }}>暂无名言</p>
-          </div>
-        ) : (
-          quotes.map((quote) => (
-            <FeedQuoteCard
-              key={quote.id}
-              quote={quote}
-              isNew={isNewQuote(quote.created_at)}
-            />
-          ))
-        )}
-
-        {/* 滑到底的温柔提示 */}
-        {quotes.length > 0 && (
-          <div
-            className="pt-6 pb-2 text-center text-xs"
-            style={{ color: "var(--t-text-muted)" }}
-          >
-            <div className="inline-flex items-center gap-2">
-              <span className="inline-block w-1 h-1 rounded-full" style={{ background: "currentColor" }} />
-              到底了 · 今天的 {quotes.length} 条已全部呈现
-              <span className="inline-block w-1 h-1 rounded-full" style={{ background: "currentColor" }} />
+      {/* 信息流主体：宽屏多列瀑布流，充分利用横向空间，消除大面积留白 */}
+      {quotes.length === 0 ? (
+        <div
+          className="p-12 text-center border"
+          style={{
+            background: "var(--t-bg-card)",
+            borderColor: "var(--t-border)",
+            borderRadius: "var(--t-radius)",
+          }}
+        >
+          <p style={{ color: "var(--t-text-secondary)" }}>暂无名言</p>
+        </div>
+      ) : (
+        <div className="columns-1 md:columns-2 xl:columns-3 gap-5 md:gap-6">
+          {quotes.map((quote) => (
+            <div key={quote.id} className="break-inside-avoid mb-5 md:mb-6">
+              <FeedQuoteCard
+                quote={quote}
+                isNew={isNewQuote(quote.created_at)}
+              />
             </div>
+          ))}
+        </div>
+      )}
+
+      {/* 滑到底的温柔提示 */}
+      {quotes.length > 0 && (
+        <div
+          className="pt-8 pb-2 text-center text-xs"
+          style={{ color: "var(--t-text-muted)" }}
+        >
+          <div className="inline-flex items-center gap-2">
+            <span className="inline-block w-1 h-1 rounded-full" style={{ background: "currentColor" }} />
+            到底了 · 今天的 {quotes.length} 条已全部呈现
+            <span className="inline-block w-1 h-1 rounded-full" style={{ background: "currentColor" }} />
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
+    </HomeModeShell>
   );
 }

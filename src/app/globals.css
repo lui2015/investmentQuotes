@@ -181,6 +181,41 @@
   --t-particle: rgba(168,85,247,0.25);
 }
 
+/* ---------- Fresh Green (清新绿) — 参考 logo 青绿/黄绿/蓝青三色 ---------- */
+[data-theme="fresh-green"] {
+  --t-bg: #f3faf5;
+  --t-bg-card: #ffffff;
+  --t-bg-nav: rgba(243,250,245,0.85);
+  --t-bg-footer: #eaf5ee;
+  --t-bg-tag: #d8f2e3;
+  --t-bg-tag-hover: #c2ead4;
+  --t-bg-input: #ffffff;
+  --t-border: #d2e8dc;
+  --t-text: #123329;
+  --t-text-secondary: #4a6d60;
+  --t-text-muted: #89a89a;
+  --t-accent: #12a179;
+  --t-accent-hover: #0d8865;
+  --t-accent-light: #34c79b;
+  --t-accent-bg: #ecfaf3;
+  --t-accent-text: #0c7a5c;
+  --t-tag-text: #0c7a5c;
+  --t-hero-from: #c3e9f0;
+  --t-hero-via: #b6e7cb;
+  --t-hero-to: #dcecb0;
+  --t-hero-text: #103e34;
+  --t-hero-sub: rgba(12,122,92,0.62);
+  --t-avatar-from: #45b0d8;
+  --t-avatar-to: #9fc93c;
+  --t-glow: rgba(18,161,121,0.28);
+  --t-selection-bg: #12a179;
+  --t-selection-text: #ffffff;
+  --t-card-shadow: rgba(16,120,95,0.12);
+  --t-font-quote: "Noto Serif SC", Georgia, serif;
+  --t-radius: 0.875rem;
+  --t-particle: rgba(18,161,121,0.16);
+}
+
 /* ============================================================
    Themed Base Styles
    ============================================================ */
@@ -261,6 +296,20 @@ body {
     url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000' fill-opacity='.03'%3E%3Ccircle cx='30' cy='30' r='1.5'/%3E%3C/g%3E%3C/svg%3E");
 }
 
+/* Fresh Green soft radial glow — 清新自然的柔光叠加 */
+[data-theme="fresh-green"] .hero-gradient {
+  background-image:
+    radial-gradient(circle at 18% 20%, rgba(255,255,255,0.5), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(159,201,60,0.22), transparent 50%),
+    linear-gradient(135deg, var(--t-hero-from) 0%, var(--t-hero-via) 50%, var(--t-hero-to) 100%);
+}
+
+/* Fresh Green card hover: subtle green lift */
+[data-theme="fresh-green"] .card-hover:hover {
+  box-shadow: 0 18px 36px -14px rgba(18,161,121,0.28);
+  border-color: rgba(18,161,121,0.3) !important;
+}
+
 /* ============================================================
    Card & Tag Common
    ============================================================ */
@@ -277,6 +326,44 @@ body {
 .tag-pill {
   @apply inline-flex items-center px-3 py-1 text-sm font-medium transition-colors;
   border-radius: 9999px;
+}
+
+/* ============================================================
+   Topic (主题分类) 卡片 —— 单一 accent 主色，编辑式克制风格
+   ============================================================ */
+.topic-card {
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease, box-shadow 0.3s ease;
+}
+/* 幽灵序号：大号衬线数字，低透明度装饰 */
+.topic-index {
+  font-size: 3.75rem;
+  font-weight: 700;
+  opacity: 0.1;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.topic-badge {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease, background 0.3s ease;
+}
+.topic-explore svg {
+  transition: transform 0.3s ease;
+}
+.group:hover .topic-card {
+  transform: translateY(-6px);
+  border-color: var(--t-accent) !important;
+  box-shadow: 0 24px 48px -20px var(--t-shadow-color);
+}
+.group:hover .topic-index {
+  opacity: 0.2;
+  transform: translateY(2px);
+}
+.group:hover .topic-badge {
+  border-color: var(--t-accent);
+  transform: scale(1.06);
+}
+.group:hover .topic-explore svg {
+  transform: translateX(4px);
 }
 
 /* ============================================================
@@ -333,4 +420,276 @@ body {
 
 [data-theme="cyberpunk"] .quote-glow {
   animation: glowPulse 3s ease-in-out infinite, glitch 4s steps(1) infinite;
+}
+
+/* ============================================================
+   Starry Mode (繁星模式) — 名言化作繁星，闪烁跳动铺满全屏
+   ============================================================ */
+.starry-overlay {
+  animation: starryFadeIn 0.6s ease both;
+}
+
+@keyframes starryFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 深空背景 + 星云光晕（光晕随当前主题强调色着色，深空底色保持沉浸） */
+.starry-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 18%, var(--t-glow, rgba(56,189,248,0.16)), transparent 42%),
+    radial-gradient(circle at 82% 78%, var(--t-glow, rgba(168,85,247,0.16)), transparent 46%),
+    radial-gradient(circle at 55% 45%, rgba(45,212,191,0.10), transparent 55%),
+    radial-gradient(ellipse at top, #161c34 0%, #0a0d1a 55%, #05060d 100%);
+}
+
+/* 背景微星尘 */
+.starry-dust {
+  position: absolute;
+  border-radius: 9999px;
+  background: #ffffff;
+  box-shadow: 0 0 6px rgba(255,255,255,0.8);
+  animation-name: dustTwinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+@keyframes dustTwinkle {
+  0%, 100% { opacity: 0.15; transform: scale(0.8); }
+  50% { opacity: 0.9; transform: scale(1.25); }
+}
+
+/* 每颗星（一条名言）—— 用 button 承载，重置默认样式 */
+.starry-star {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  line-height: 1.3;
+  z-index: 10;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.starry-star:hover,
+.starry-star:focus-visible,
+.starry-star--active {
+  z-index: 55;
+  outline: none;
+}
+
+/* 漂浮层：仅「亮星」漂浮，避免数百个 transform 动画拖垮 GPU */
+.starry-drift {
+  display: inline-block;
+}
+.starry-star--float .starry-drift {
+  animation: starDrift var(--drift, 12s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes starDrift {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(var(--dx, 0), var(--dy, 0)) scale(1.06); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+/* 闪烁层（仅透明度动画，最省性能；与 hover 缩放的 transform 互不冲突） */
+.starry-body {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.15em 0.1em;
+  animation: starTwinkle var(--twk, 3.5s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: center;
+}
+.starry-star:hover .starry-body,
+.starry-star:focus-visible .starry-body,
+.starry-star--active .starry-body {
+  transform: scale(1.85);
+  animation-play-state: paused;
+  opacity: 1 !important;
+}
+
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.42; }
+  50% { opacity: 1; }
+}
+
+/* 星点 */
+.starry-dot {
+  flex-shrink: 0;
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 9999px;
+  box-shadow: 0 0 8px currentColor, 0 0 16px currentColor;
+}
+
+/* 纯发光点星（不常显文字，仅铺满夜空；选中即在底部卡片查看名言） */
+.starry-star--dot .starry-body {
+  gap: 0;
+  padding: 0.5em; /* 放大透明命中区，方便点选小星点（尤其触屏） */
+}
+.starry-star--dot .starry-dot {
+  width: 0.62em;
+  height: 0.62em;
+  box-shadow: 0 0 5px currentColor, 0 0 11px currentColor;
+}
+.starry-star--dot:hover .starry-body,
+.starry-star--dot:focus-visible .starry-body,
+.starry-star--dot.starry-star--active .starry-body {
+  transform: scale(2.5);
+}
+
+/* 短名言文字 */
+.starry-label {
+  white-space: nowrap;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 10px rgba(0,0,0,0.6), 0 0 18px currentColor;
+}
+
+/* 名言卡片：锚定到选中星星坐标浮现，随名言移动；水平钳制在视口内，
+   依据星星在上/下半屏自动翻转到下方/上方，完整展示、永不被裁剪或变形 */
+.starry-card {
+  position: absolute;
+  left: clamp(min(46vw, 21rem), var(--card-x, 50%), calc(100% - min(46vw, 21rem)));
+  top: var(--card-y, 50%);
+  width: min(92vw, 42rem);
+  z-index: 63;
+  padding: 1rem 1.15rem 0.95rem;
+  border-radius: 1rem;
+  background: rgba(10, 14, 26, 0.92);
+  border: 1px solid var(--t-accent, rgba(255, 255, 255, 0.16));
+  box-shadow: 0 20px 50px -16px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  pointer-events: auto;
+  animation: starryCardIn 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* 星星在上半屏 -> 卡片浮现在其下方 */
+.starry-card--below {
+  transform: translate(-50%, 1.4rem);
+}
+/* 星星在下半屏 -> 卡片浮现在其上方 */
+.starry-card--above {
+  transform: translate(-50%, calc(-100% - 1.4rem));
+}
+@keyframes starryCardIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.starry-card-quote {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #f5f7ff;
+  font-weight: 500;
+}
+.starry-card-en {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.55);
+}
+.starry-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.starry-card-author {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.72);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.starry-card-link {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--t-accent-light, #bfe3ff);
+  transition: transform 0.2s ease;
+}
+.starry-card-link:hover {
+  transform: translateX(2px);
+}
+/* 未选中时的固定底部引导提示 */
+.starry-card-hint {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+  z-index: 63;
+  padding: 0.5rem 1.05rem;
+  border-radius: 9999px;
+  background: rgba(10, 14, 26, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
+  pointer-events: none;
+}
+.starry-card-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.6rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.55);
+  border-radius: 9999px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.starry-card-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+@media (max-width: 640px) {
+  .starry-card {
+    padding: 0.85rem 1rem;
+  }
+  .starry-card-quote { font-size: 0.94rem; }
+  .starry-card-hint { bottom: 1rem; }
+}
+
+/* 退出按钮 */
+.starry-exit {
+  color: #eef2ff;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(6px);
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+.starry-exit:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+/* 尊重减动偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .starry-star--float .starry-drift,
+  .starry-body,
+  .starry-dust {
+    animation: none !important;
+  }
+  .starry-body { opacity: 0.92; }
 }
