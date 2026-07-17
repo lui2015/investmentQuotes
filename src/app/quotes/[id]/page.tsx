@@ -71,7 +71,7 @@ export default async function QuoteDetailPage({ params }: { params: Params }) {
                 <div className="text-sm" style={{ color: "var(--t-text-secondary)" }}>{quote.master_title} · {quote.master_category}</div>
               </div>
             </Link>
-            <div className="grid grid-cols-3 sm:flex sm:flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 sm:justify-end">
               <FavoriteButton quoteId={quote.id} />
               <ExportImageButton quote={quote} interp={interp} />
               <CopyButton quote={quote} />
