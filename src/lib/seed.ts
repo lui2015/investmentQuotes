@@ -1,5 +1,6 @@
 import { initDb } from "./db";
 import { v4 } from "./uuid";
+import { normalizeText } from "./similarity";
 
 const masters = [
   {
@@ -332,6 +333,36 @@ export function seedData() {
       }
     });
     selfHeal();
+  }
+
+  // 大师去重自愈：合并「同名但不同 id」的重复大师（idempotent，幂等）。
+  // 场景：用户提交名言时若没匹配到规范种子大师，会新建 user-submitted 大师（无头像），
+  // 导致库里出现多个同名大师（如「段永平」既有种子 m-duan 又有 user 新建者），
+  // 表现为部分卡片有头像、部分没有。此处把重复大师的名言迁移到规范种子大师，再删除重复大师。
+  {
+    const allMasters = db
+      .prepare("SELECT id, name_cn FROM masters")
+      .all() as { id: string; name_cn: string }[];
+    const moveQuotes = db.prepare("UPDATE quotes SET master_id = ? WHERE master_id = ?");
+    const clearMatchedMaster = db.prepare(
+      "UPDATE quote_submissions SET matched_master_id = ? WHERE matched_master_id = ?",
+    );
+    const deleteMaster = db.prepare("DELETE FROM masters WHERE id = ?");
+    const dedup = db.transaction(() => {
+      for (const canonical of masters) {
+        const canonNorm = normalizeText(canonical.name_cn);
+        if (!canonNorm) continue;
+        for (const m of allMasters) {
+          if (m.id === canonical.id) continue;
+          if (normalizeText(m.name_cn) === canonNorm) {
+            moveQuotes.run(canonical.id, m.id);
+            clearMatchedMaster.run(canonical.id, m.id);
+            deleteMaster.run(m.id);
+          }
+        }
+      }
+    });
+    dedup();
   }
 
   const masterCount = (db.prepare("SELECT COUNT(*) as count FROM masters").get() as { count: number }).count;
