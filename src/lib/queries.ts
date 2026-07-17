@@ -176,6 +176,23 @@ export function getAllMasters(): Master[] {
 }
 
 /**
+ * 首页"投资大师"模块：按名言数量取头部几位有头像/有简介的大师。
+ * 过滤掉 user-submitted（作者信息为空），按 quote_count 倒序。
+ */
+export function getFeaturedMasters(limit = 8): Master[] {
+  ensureDb();
+  const db = initDb();
+  return db.prepare(`
+    SELECT m.*, (SELECT COUNT(*) FROM quotes q WHERE q.master_id = m.id) as quote_count
+    FROM masters m
+    WHERE (m.category != 'user-submitted' OR m.category IS NULL)
+      AND m.name_cn IS NOT NULL
+    ORDER BY quote_count DESC, m.created_at ASC
+    LIMIT ?
+  `).all(limit) as Master[];
+}
+
+/**
  * 全量大师列表（不过滤 user-submitted），仅供管理后台使用。
  */
 export function getAllMastersAdmin(): Master[] {

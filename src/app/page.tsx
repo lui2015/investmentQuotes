@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getDailyQuote, getLatestQuotes, getAllQuotes } from "@/lib/queries";
+import { getDailyQuote, getLatestQuotes, getAllQuotes, getFeaturedMasters } from "@/lib/queries";
 import { FeedQuoteCard } from "@/components/FeedQuoteCard";
 import { MasterAvatar } from "@/components/MasterAvatar";
 import { HomeModeShell } from "@/components/HomeModeShell";
@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 
 export default function HomePage() {
   const daily = getDailyQuote();
+  const featuredMasters = getFeaturedMasters(8);
   // 今日推荐从 feed 中排除，避免重复；展示 60 条让用户持续下滑浏览
   const allLatest = getLatestQuotes(80);
   const quotes = daily
@@ -20,8 +21,6 @@ export default function HomePage() {
     const ts = new Date(createdAt.replace(" ", "T") + "Z").getTime();
     return Number.isFinite(ts) && ts >= sevenDaysAgo;
   };
-
-  const newCount = quotes.filter((q) => isNewQuote(q.created_at)).length;
 
   // 今日推荐日期展示
   const today = new Date();
@@ -133,6 +132,58 @@ export default function HomePage() {
         </section>
       )}
 
+      {/* 投资大师 */}
+      {featuredMasters.length > 0 && (
+        <section className="mb-10 md:mb-14">
+          <div className="flex items-center justify-between gap-4 mb-5 md:mb-6">
+            <div className="flex items-center gap-3 min-w-0">
+              <span
+                className="w-1.5 h-6 rounded-full shrink-0"
+                style={{ background: "var(--t-accent)" }}
+              />
+              <h2
+                className="text-xl md:text-2xl font-bold tracking-tight truncate"
+                style={{ color: "var(--t-text)" }}
+              >
+                投资大师
+              </h2>
+            </div>
+            <Link
+              href="/masters"
+              className="group inline-flex items-center gap-1 text-sm font-semibold transition-transform hover:translate-x-0.5 shrink-0"
+              style={{ color: "var(--t-accent)" }}
+            >
+              查看全部
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-x-3 gap-y-5 md:gap-x-4 md:gap-y-6">
+            {featuredMasters.map((master) => (
+              <Link
+                key={master.id}
+                href={`/masters/${master.id}`}
+                className="group flex flex-col items-center text-center gap-2 md:gap-3"
+              >
+                <MasterAvatar
+                  name={master.name_cn}
+                  avatarUrl={master.avatar_url}
+                  className="w-16 h-16 md:w-20 md:h-20 rounded-full text-white font-bold text-lg md:text-xl shadow-md transition-transform duration-300 group-hover:scale-105"
+                />
+                <span
+                  className="text-xs md:text-sm font-medium leading-tight line-clamp-1"
+                  style={{ color: "var(--t-text)" }}
+                >
+                  {master.name_cn}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* 信息流页头 */}
       <header className="mb-6 md:mb-8">
         <div className="flex items-baseline justify-between gap-4 mb-1">
@@ -142,12 +193,16 @@ export default function HomePage() {
           >
             投资名言
           </h1>
-          <span
-            className="text-xs font-mono px-2.5 py-1 rounded-full"
-            style={{ background: "var(--t-bg-tag)", color: "var(--t-tag-text)" }}
+          <Link
+            href="/quotes"
+            className="group inline-flex items-center gap-1 text-sm font-semibold transition-transform hover:translate-x-0.5 shrink-0"
+            style={{ color: "var(--t-accent)" }}
           >
-            {quotes.length} 条 · 本周新增 {newCount}
-          </span>
+            查看更多
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
         </div>
         <p className="text-sm" style={{ color: "var(--t-text-secondary)" }}>
           大师智慧，按时间持续更新
