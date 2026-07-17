@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { withBasePath } from "@/lib/basePath";
 import { useFavorites } from "./FavoritesProvider";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 
@@ -37,15 +38,14 @@ export function Navbar() {
       style={{ background: "var(--t-bg-nav)", borderColor: "var(--t-border)" }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-2xl">💎</span>
-            <span
-              className="text-xl font-bold transition-colors"
-              style={{ color: "var(--t-accent)" }}
-            >
-              投资名言
-            </span>
+        <div className="flex items-center justify-between h-16 sm:h-20">
+          <Link href="/" className="flex items-center group" aria-label="投资名言">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={withBasePath("/logo.png")}
+              alt="投资名言"
+              className="h-12 sm:h-16 w-auto object-contain"
+            />
           </Link>
 
           <div className="hidden md:flex items-center gap-8">

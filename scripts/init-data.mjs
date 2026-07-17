@@ -103,6 +103,9 @@ UPDATE masters SET avatar_url = '/avatars/lynch.png' WHERE id = 'm-lynch';
 UPDATE masters SET avatar_url = '/avatars/dalio.png' WHERE id = 'm-dalio';
 UPDATE masters SET avatar_url = '/avatars/livermore.png' WHERE id = 'm-livermore';
 UPDATE masters SET avatar_url = '/avatars/taleb.png' WHERE id = 'm-taleb';
+UPDATE masters SET avatar_url = '/avatars/bogle.png' WHERE id = 'm-bogle';
+UPDATE masters SET avatar_url = '/avatars/fisher.png' WHERE id = 'm-fisher';
+UPDATE masters SET avatar_url = '/avatars/klarman.png' WHERE id = 'm-klarman';
 `;
 db.exec(updateAvatarsSQL);
 
