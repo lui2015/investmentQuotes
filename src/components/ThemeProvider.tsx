@@ -13,7 +13,7 @@ export const THEMES = [
 
 export type ThemeId = (typeof THEMES)[number]["id"];
 
-const DEFAULT_THEME: ThemeId = "cyberpunk";
+const DEFAULT_THEME: ThemeId = "fresh-green";
 
 const ThemeContext = createContext<{
   theme: ThemeId;
