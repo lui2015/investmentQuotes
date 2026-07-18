@@ -1,16 +1,25 @@
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { getDailyQuote, getLatestQuotes, getFeaturedMasters } from "@/lib/queries";
 import { FeedQuoteCard } from "@/components/FeedQuoteCard";
 import { MasterAvatar } from "@/components/MasterAvatar";
 import { HomeModeShell } from "@/components/HomeModeShell";
 
+// 数据库在容器启动时（init-data）才灌入，构建期是空库，故首页保持动态渲染（运行时查真实库）；
+// 同时用 unstable_cache 把三条查询缓存 5 分钟，避免每次请求都打库，提升 TTFB
 export const dynamic = "force-dynamic";
 
-export default function HomePage() {
-  const daily = getDailyQuote();
-  const featuredMasters = getFeaturedMasters(8);
-  // 今日推荐从 feed 中排除，避免重复；展示 60 条让用户持续下滑浏览
-  const allLatest = getLatestQuotes(80);
+export default async function HomePage() {
+  const { daily, featuredMasters, allLatest } = await unstable_cache(
+    async () => {
+      const daily = getDailyQuote();
+      const featuredMasters = getFeaturedMasters(8);
+      const allLatest = getLatestQuotes(80);
+      return { daily, featuredMasters, allLatest };
+    },
+    ["home-feed"],
+    { revalidate: 300 }
+  )();
   const quotes = daily
     ? allLatest.filter((q) => q.id !== daily.id).slice(0, 60)
     : allLatest.slice(0, 60);

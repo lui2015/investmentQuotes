@@ -434,21 +434,31 @@ export function getAllQuotes(): Quote[] {
   return attachTags(rows);
 }
 
+/** 繁星 / 气泡模式专用精简结构：仅含展示所需字段，显著减小 payload */
+export interface StarQuote {
+  id: string;
+  content_cn: string;
+  content_en: string | null;
+  master_name_cn: string;
+  master_title: string | null;
+}
+
 /**
- * 繁星模式专用：返回全库名言（含大师信息），不加载标签。
+ * 繁星模式用：返回全库名言（含必要大师信息），不加载标签。
+ * 仅 SELECT 展示所需字段，避免 content_en 之外的冗余列（source/created_at 等）撑大 payload；
  * 数据量大，由首页改为「按需拉取」（/api/stars），避免拖慢首屏。
  */
-export function getStarQuotes(): Quote[] {
+export function getStarQuotes(): StarQuote[] {
   ensureDb();
   const db = initDb();
   return db
     .prepare(`
-    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category, m.avatar_url as master_avatar_url
+    SELECT q.id, q.content_cn, q.content_en, m.name_cn AS master_name_cn, m.title AS master_title
     FROM quotes q
     JOIN masters m ON q.master_id = m.id
     ORDER BY q.favorite_count DESC, q.created_at DESC
   `)
-    .all() as Quote[];
+    .all() as StarQuote[];
 }
 
 // ──────────────────────────────────────────────────────────────────────

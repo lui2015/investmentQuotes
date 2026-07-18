@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import type { Quote } from "@/lib/queries";
+import type { StarQuote } from "@/lib/queries";
 
 /**
  * 基于字符串 id 的确定性伪随机（FNV-1a 变体），保证 SSR 与 CSR 渲染一致，
@@ -32,11 +32,11 @@ function truncate(text: string, max = 16): string {
   return text.length > max ? text.slice(0, max - 1) + "…" : text;
 }
 
-export function StarrySky({ quotes, onExit }: { quotes: Quote[]; onExit: () => void }) {
+export function StarrySky({ quotes, onExit }: { quotes: StarQuote[]; onExit: () => void }) {
   const [isMobile, setIsMobile] = useState(false);
   const [canHover, setCanHover] = useState(true);
   // 当前选中（hover / 轻触）的名言：卡片锚定到该星星所在位置浮现，跟随名言移动
-  const [active, setActive] = useState<{ q: Quote; x: number; y: number } | null>(null);
+  const [active, setActive] = useState<{ q: StarQuote; x: number; y: number } | null>(null);
 
   useEffect(() => {
     const mqMobile = window.matchMedia("(max-width: 640px)");
@@ -106,7 +106,7 @@ export function StarrySky({ quotes, onExit }: { quotes: Quote[]; onExit: () => v
 
   // 与星星交互：桌面 hover 即选中；触屏轻触选中（不直接跳转，先看完整名言）
   // 记录星星坐标，卡片据此锚定浮现
-  const pick = (q: Quote, x: number, y: number) => setActive({ q, x, y });
+  const pick = (q: StarQuote, x: number, y: number) => setActive({ q, x, y });
 
   return (
     <div className="starry-overlay fixed inset-0 z-[60] overflow-hidden" role="dialog" aria-label="繁星模式">

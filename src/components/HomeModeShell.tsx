@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Quote } from "@/lib/queries";
-import { StarrySky } from "./StarrySky";
-import { BubbleMode } from "./BubbleMode";
+import dynamic from "next/dynamic";
+import type { StarQuote } from "@/lib/queries";
+
+// 沉浸模式组件体积较大且首屏不需要，按需懒加载（进入对应模式时才下载对应 chunk）
+const StarrySky = dynamic(() => import("./StarrySky").then((m) => m.StarrySky));
+const BubbleMode = dynamic(() => import("./BubbleMode").then((m) => m.BubbleMode));
 
 type Mode = "list" | "stars" | "bubbles";
 
@@ -13,7 +16,7 @@ export function HomeModeShell({ children }: { children: React.ReactNode }) {
   // 手机与触屏平板不显示按钮
   const [isDesktop, setIsDesktop] = useState(false);
   // 沉浸模式（繁星/气泡）数据按需加载：进入时才向 /api/stars 拉取，避免拖慢首屏
-  const [starQuotes, setStarQuotes] = useState<Quote[] | null>(null);
+  const [starQuotes, setStarQuotes] = useState<StarQuote[] | null>(null);
   const [loadingStars, setLoadingStars] = useState(false);
   // 悬浮「+」按钮展开的模式选择菜单
   const [menuOpen, setMenuOpen] = useState(false);
@@ -30,7 +33,10 @@ export function HomeModeShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if ((mode === "stars" || mode === "bubbles") && starQuotes === null && !loadingStars) {
       setLoadingStars(true);
-      fetch("api/stars")
+      // 该组件仅用于首页，首页路径即部署前缀 basePath（如 /investmentQuotes）；
+      // 据此拼接 API 绝对路径，避免相对路径在带前缀部署时解析到根路径导致 404
+      const basePath = window.location.pathname.replace(/\/$/, "");
+      fetch(`${basePath}/api/stars`)
         .then((r) => r.json())
         .then((d) => setStarQuotes(d.quotes || []))
         .catch(() => setStarQuotes([]))

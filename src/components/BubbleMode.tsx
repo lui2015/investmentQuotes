@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import type { Quote } from "@/lib/queries";
+import type { StarQuote } from "@/lib/queries";
 
 /**
  * 与星星模式一致的确定性伪随机（FNV-1a 变体），保证布局稳定、避免 hydration 跳变。
@@ -45,11 +45,11 @@ function truncate(text: string, max = 14): string {
   return text.length > max ? text.slice(0, max - 1) + "…" : text;
 }
 
-export function BubbleMode({ quotes, onExit }: { quotes: Quote[]; onExit: () => void }) {
+export function BubbleMode({ quotes, onExit }: { quotes: StarQuote[]; onExit: () => void }) {
   const [isMobile, setIsMobile] = useState(false);
   const [canHover, setCanHover] = useState(true);
   // 当前选中（hover / 轻触）的名言：卡片锚定到泡泡被点中处的屏幕坐标浮现
-  const [active, setActive] = useState<{ q: Quote; x: number; y: number } | null>(null);
+  const [active, setActive] = useState<{ q: StarQuote; x: number; y: number } | null>(null);
 
   useEffect(() => {
     const mqMobile = window.matchMedia("(max-width: 640px)");
@@ -102,7 +102,7 @@ export function BubbleMode({ quotes, onExit }: { quotes: Quote[]; onExit: () => 
   }, [isMobile]);
 
   // 点中泡泡时记录其屏幕坐标，供名言卡片锚定浮现
-  const pick = (q: Quote, e: React.MouseEvent<HTMLButtonElement>) => {
+  const pick = (q: StarQuote, e: React.MouseEvent<HTMLButtonElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
     const x = ((r.left + r.width / 2) / window.innerWidth) * 100;
     const y = ((r.top + r.height / 2) / window.innerHeight) * 100;

@@ -40,6 +40,8 @@ export function MasterAvatar({
       <img
         src={resolveAvatarSrc(avatarUrl)}
         alt={name}
+        loading="lazy"
+        decoding="async"
         className={`${className} object-cover`.trim()}
       />
     );
