@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getDailyQuote, getLatestQuotes, getAllQuotes, getFeaturedMasters } from "@/lib/queries";
+import { getDailyQuote, getLatestQuotes, getFeaturedMasters } from "@/lib/queries";
 import { FeedQuoteCard } from "@/components/FeedQuoteCard";
 import { MasterAvatar } from "@/components/MasterAvatar";
 import { HomeModeShell } from "@/components/HomeModeShell";
@@ -27,15 +27,9 @@ export default function HomePage() {
   const weekDays = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
   const dateStr = `${today.getFullYear()}年${String(today.getMonth() + 1).padStart(2, "0")}月${String(today.getDate()).padStart(2, "0")}日 · ${weekDays[today.getDay()]}`;
 
-  // 繁星模式的名言集合：用上名言库中「所有」名言，铺满整个星空
-  // getAllQuotes 已按 is_featured DESC, favorite_count DESC 排序，靠前的作为「亮星」常显文字
-  const allQuotes = getAllQuotes();
-  const starQuotes = daily
-    ? [daily, ...allQuotes.filter((q) => q.id !== daily.id)]
-    : allQuotes;
-
+  // 繁星模式的名言集合改为「按需拉取」（/api/stars），不再阻塞首屏渲染
   return (
-    <HomeModeShell starQuotes={starQuotes}>
+    <HomeModeShell>
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
       {/* 今日推荐 */}
       {daily && (

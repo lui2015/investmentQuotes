@@ -133,11 +133,7 @@ export function getLatestQuotes(limit = 6): Quote[] {
     LIMIT ?
   `).all(limit) as Quote[];
 
-  for (const row of rows) {
-    row.tags = getQuoteTags(row.id);
-  }
-
-  return rows;
+  return attachTags(rows);
 }
 
 export function getPopularQuotes(limit = 6): Quote[] {
@@ -279,6 +275,40 @@ export function getQuoteTags(quoteId: string): Tag[] {
   `).all(quoteId) as Tag[];
 }
 
+/**
+ * 批量获取多条名言的标签（单次 IN 查询，消除 N+1），返回 quote_id -> Tag[] 映射。
+ */
+export function getQuotesTagsMap(ids: string[]): Map<string, Tag[]> {
+  const map = new Map<string, Tag[]>();
+  if (!ids.length) return map;
+  const db = initDb();
+  const placeholders = ids.map(() => "?").join(",");
+  const rows = db
+    .prepare(
+      `
+    SELECT qt.quote_id, t.*
+    FROM quote_tags qt
+    JOIN tags t ON qt.tag_id = t.id
+    WHERE qt.quote_id IN (${placeholders})
+  `,
+    )
+    .all(...ids) as (Tag & { quote_id: string })[];
+
+  for (const r of rows) {
+    const { quote_id, ...tag } = r;
+    if (!map.has(quote_id)) map.set(quote_id, []);
+    map.get(quote_id)!.push(tag as Tag);
+  }
+  return map;
+}
+
+/** 给一批名言批量挂载标签（O(1) 查询），替代逐条 getQuoteTags 的 N+1。 */
+function attachTags(rows: Quote[]): Quote[] {
+  const map = getQuotesTagsMap(rows.map((r) => r.id));
+  for (const row of rows) row.tags = map.get(row.id) || [];
+  return rows;
+}
+
 export function getQuoteById(id: string): Quote | null {
   ensureDb();
   const db = initDb();
@@ -401,11 +431,24 @@ export function getAllQuotes(): Quote[] {
     ORDER BY q.is_featured DESC, q.favorite_count DESC
   `).all() as Quote[];
 
-  for (const row of rows) {
-    row.tags = getQuoteTags(row.id);
-  }
+  return attachTags(rows);
+}
 
-  return rows;
+/**
+ * 繁星模式专用：返回全库名言（含大师信息），不加载标签。
+ * 数据量大，由首页改为「按需拉取」（/api/stars），避免拖慢首屏。
+ */
+export function getStarQuotes(): Quote[] {
+  ensureDb();
+  const db = initDb();
+  return db
+    .prepare(`
+    SELECT q.*, m.name_cn as master_name_cn, m.name_en as master_name_en, m.title as master_title, m.category as master_category, m.avatar_url as master_avatar_url
+    FROM quotes q
+    JOIN masters m ON q.master_id = m.id
+    ORDER BY q.favorite_count DESC, q.created_at DESC
+  `)
+    .all() as Quote[];
 }
 
 // ──────────────────────────────────────────────────────────────────────
