@@ -693,3 +693,131 @@ body {
   }
   .starry-body { opacity: 0.92; }
 }
+
+/* ============================================================
+   Bubble Mode (气泡模式) — 名言化作七彩泡泡，飘荡全屏，如梦如幻
+   ============================================================ */
+.bubble-overlay {
+  animation: bubbleFadeIn 0.6s ease both;
+}
+
+@keyframes bubbleFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 梦幻柔光渐变背景：不透明、铺满全屏，自成如梦如幻的场景（不依赖底层主页） */
+.bubble-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 16% 18%, rgba(255,159,196,0.55), transparent 46%),
+    radial-gradient(circle at 84% 24%, rgba(120,190,255,0.5), transparent 46%),
+    radial-gradient(circle at 28% 84%, rgba(201,140,252,0.5), transparent 48%),
+    radial-gradient(circle at 78% 82%, rgba(128,235,158,0.45), transparent 48%),
+    linear-gradient(135deg, #fde7f3 0%, #e6f1fd 45%, #e9f7ee 100%);
+  background-size: 320% 320%;
+  background-color: #edf4fb;
+  animation: bubbleBgShift 22s ease-in-out infinite;
+}
+
+@keyframes bubbleBgShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* 泡泡本体：底部升起、左右轻摆、玻璃高光 + 外发光 */
+.bubble {
+  position: absolute;
+  bottom: -180px;
+  border: 0;
+  padding: 0;
+  border-radius: 9999px;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow:
+    inset 0 0 18px rgba(255,255,255,0.55),
+    inset 6px -8px 22px rgba(255,255,255,0.35),
+    0 8px 30px -6px rgba(0,0,0,0.25);
+  animation: bubbleRise var(--rise, 22s) linear infinite;
+  animation-delay: var(--rise-delay, 0s);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.bubble--decor { pointer-events: none; }
+
+/* 镜面高光点 */
+.bubble::before {
+  content: "";
+  position: absolute;
+  top: 15%;
+  left: 21%;
+  width: 26%;
+  height: 22%;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(255,255,255,0) 70%);
+  filter: blur(1px);
+}
+
+/* 升起 + 摆动（单元素，用 --sway 控制水平摆幅） */
+@keyframes bubbleRise {
+  0%   { transform: translate(0, 0) scale(0.92); opacity: 0; }
+  8%   { opacity: 1; }
+  25%  { transform: translate(var(--sway), -32vh) scale(1); }
+  50%  { transform: translate(calc(var(--sway) * -1), -64vh) scale(1.02); }
+  75%  { transform: translate(var(--sway), -96vh) scale(1.04); }
+  92%  { opacity: 1; }
+  100% { transform: translate(0, -128vh) scale(1.06); opacity: 0; }
+}
+
+/* 承载名言的「亮泡」：居中显示短句，选中时定格放大 */
+.bubble--quote {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+.bubble--quote:hover,
+.bubble--quote:focus-visible,
+.bubble--active {
+  z-index: 55;
+  outline: none;
+  animation-play-state: paused;
+}
+.bubble--quote:hover,
+.bubble--quote:focus-visible,
+.bubble--active {
+  transform: scale(1.12);
+  box-shadow:
+    inset 0 0 22px rgba(255,255,255,0.7),
+    inset 6px -8px 26px rgba(255,255,255,0.45),
+    0 14px 44px -8px rgba(0,0,0,0.4);
+}
+.bubble-text {
+  padding: 0 12%;
+  text-align: center;
+  line-height: 1.25;
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.4), 0 0 10px rgba(0,0,0,0.25);
+  pointer-events: none;
+}
+
+/* 沉浸模式选择菜单：选项弹出动画 */
+.mode-menu-item {
+  animation: modePopIn 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.mode-menu-item:nth-child(2) {
+  animation-delay: 0.04s;
+}
+@keyframes modePopIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+/* 尊重减动偏好：气泡静止铺满，不再升起飘荡 */
+@media (prefers-reduced-motion: reduce) {
+  .bubble { animation: none !important; bottom: auto; top: auto; }
+  .bubble-bg { animation: none !important; }
+}
+
