@@ -423,6 +423,64 @@ body {
 }
 
 /* ============================================================
+   今日推荐「换一句」切换动画
+   - dq-swap-out / dq-swap-in：内容退出(上移+模糊+缩小) 与 进入(下方上移+回弹)
+   - dq-sweep：卡片表面一道高光斜扫
+   - dq-btn-spin：按钮图标 360° 旋转
+   - dq-card-pulse：卡片瞬间辉光脉冲
+   ============================================================ */
+@keyframes dq-swap-out {
+  0%   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  100% { opacity: 0; transform: translateY(-26px) scale(0.94); filter: blur(4px); }
+}
+@keyframes dq-swap-in {
+  0%   { opacity: 0; transform: translateY(26px) scale(0.94); filter: blur(4px); }
+  55%  { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+.dq-swap-out { animation: dq-swap-out 0.26s cubic-bezier(0.55, 0, 0.55, 0.2) forwards; }
+.dq-swap-in  { animation: dq-swap-in 0.46s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+
+@keyframes dq-sweep {
+  0%   { transform: translateX(-130%) skewX(-20deg); opacity: 0; }
+  20%  { opacity: 0.85; }
+  100% { transform: translateX(240%) skewX(-20deg); opacity: 0; }
+}
+.dq-sweep {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 45%;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  opacity: 0;
+  border-radius: inherit;
+  animation: dq-sweep 0.7s ease-out forwards;
+  z-index: 5;
+}
+
+@keyframes dq-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.dq-btn-spin { animation: dq-spin 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
+
+@keyframes dq-card-pulse {
+  0%, 100% { box-shadow: 0 0 0 transparent; }
+  45%      { box-shadow: 0 0 28px var(--t-glow); }
+}
+.dq-card-pulse { animation: dq-card-pulse 0.7s ease-out; }
+
+/* 尊重减动偏好：关闭切换动效，直接换内容 */
+@media (prefers-reduced-motion: reduce) {
+  .dq-swap-out, .dq-swap-in, .dq-sweep, .dq-btn-spin, .dq-card-pulse {
+    animation: none !important;
+  }
+  .dq-sweep { display: none; }
+}
+
+/* ============================================================
    Starry Mode (繁星模式) — 名言化作繁星，闪烁跳动铺满全屏
    ============================================================ */
 .starry-overlay {
