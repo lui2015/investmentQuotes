@@ -78,28 +78,28 @@ export function DailyQuote({ daily, pool }: { daily: Quote; pool: Quote[] }) {
 
   return (
     <section className="mb-10 md:mb-14">
-      {/* 区块标题 + 换一句按钮 + 日期 */}
-      <div className="flex items-baseline justify-between gap-3 mb-3">
-        <div className="flex items-center gap-2">
-          <span
-            className="inline-flex items-center justify-center w-7 h-7 rounded-full text-sm"
-            style={{ background: "var(--t-accent)", color: "var(--t-bg)" }}
-            aria-hidden
-          >
-            ✨
-          </span>
-          <h2 className="text-lg md:text-xl font-bold" style={{ color: "var(--t-text)" }}>
-            今日推荐
-          </h2>
-        </div>
+      {/* 区块标题 + 换一句按钮 + 日期 —— 移动端分层避免拥挤错位 */}
+      <div className="mb-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <span
+              className="inline-flex items-center justify-center w-7 h-7 rounded-full text-sm shrink-0"
+              style={{ background: "var(--t-accent)", color: "var(--t-bg)" }}
+              aria-hidden
+            >
+              ✨
+            </span>
+            <h2 className="text-lg md:text-xl font-bold truncate" style={{ color: "var(--t-text)" }}>
+              今日推荐
+            </h2>
+          </div>
 
-        <div className="flex items-center gap-3">
           {canSwap && (
             <button
               type="button"
               onClick={swap}
               disabled={phase !== "idle"}
-              className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-70"
+              className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-70 shrink-0"
               style={{
                 borderColor: "var(--t-accent)",
                 color: "var(--t-accent)",
@@ -126,13 +126,14 @@ export function DailyQuote({ daily, pool }: { daily: Quote; pool: Quote[] }) {
               换一句
             </button>
           )}
-          <span className="text-xs font-mono" style={{ color: "var(--t-text-muted)" }}>
-            {(() => {
-              const t = new Date();
-              const wd = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-              return `${t.getFullYear()}年${String(t.getMonth() + 1).padStart(2, "0")}月${String(t.getDate()).padStart(2, "0")}日 · ${wd[t.getDay()]}`;
-            })()}
-          </span>
+        </div>
+
+        <div className="mt-1.5 text-xs font-mono" style={{ color: "var(--t-text-muted)" }}>
+          {(() => {
+            const t = new Date();
+            const wd = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+            return `${t.getFullYear()}年${String(t.getMonth() + 1).padStart(2, "0")}月${String(t.getDate()).padStart(2, "0")}日 · ${wd[t.getDay()]}`;
+          })()}
         </div>
       </div>
 
@@ -212,7 +213,7 @@ export function DailyQuote({ daily, pool }: { daily: Quote; pool: Quote[] }) {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 shrink-0">
                 {shown.source && (
                   <span className="text-xs hidden sm:inline" style={{ color: "var(--t-text-muted)" }}>
                     📖 {shown.source}{shown.source_year ? ` · ${shown.source_year}` : ""}
