@@ -399,27 +399,77 @@ export function QuotesClient({
       )}
 
       {/* ── 主题分类 ── */}
-      {tab === "topics" && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tags.map((tag) => (
-            <Link key={tag.id} href={`/topics/${tag.slug}`} className="block">
-              <div className="card-hover overflow-hidden border h-full transition-colors duration-300" style={{ background: "var(--t-bg-card)", borderColor: "var(--t-border)", borderRadius: "var(--t-radius)" }}>
-                <div className="p-6" style={{ background: `linear-gradient(135deg, var(--t-avatar-from), var(--t-avatar-to))` }}>
-                  <span className="text-4xl">{tagIcons[tag.name] || "💬"}</span>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-2" style={{ color: "var(--t-text)" }}>{tag.name}</h3>
-                  <p className="text-sm mb-4 leading-relaxed" style={{ color: "var(--t-text-secondary)" }}>{tag.description}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium" style={{ color: "var(--t-accent)" }}>{tag.quote_count} 条名言</span>
-                    <span className="text-sm" style={{ color: "var(--t-text-muted)" }}>探索 →</span>
-                  </div>
-                </div>
+      {tab === "topics" &&
+        (() => {
+          const sorted = [...tags].sort((a, b) => (b.quote_count || 0) - (a.quote_count || 0));
+          const [featured, ...rest] = sorted;
+          return (
+            <div>
+              {/* 精选头条：名言最多的主题 */}
+              {featured && (
+                <Link href={`/topics/${featured.slug}`} className="topic-feature group block mb-6">
+                  <article
+                    className="relative flex flex-col sm:flex-row sm:items-center gap-6 p-7 border"
+                    style={{ background: "var(--t-bg-card)", borderColor: "var(--t-border)", borderRadius: "var(--t-radius)" }}
+                  >
+                    <div className="feature-glow" aria-hidden />
+                    <div className="topic-badge flex items-center justify-center w-20 h-20 text-4xl rounded-3xl shrink-0" aria-hidden>
+                      {tagIcons[featured.name] || "💬"}
+                    </div>
+                    <div className="relative flex-1 min-w-0">
+                      <div className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--t-accent)" }}>
+                        热门主题
+                      </div>
+                      <h2 className="text-2xl font-bold mb-2" style={{ color: "var(--t-text)" }}>{featured.name}</h2>
+                      <p className="text-sm leading-relaxed mb-3 line-clamp-2" style={{ color: "var(--t-text-secondary)" }}>
+                        {featured.description}
+                      </p>
+                      <span className="inline-flex items-baseline gap-1 text-sm" style={{ color: "var(--t-text-muted)" }}>
+                        <span className="text-base font-bold" style={{ color: "var(--t-accent)" }}>{featured.quote_count}</span>
+                        条名言
+                      </span>
+                    </div>
+                    <span className="topic-arrow inline-flex items-center gap-1.5 text-sm font-semibold shrink-0" style={{ color: "var(--t-accent)" }}>
+                      进入主题
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </span>
+                  </article>
+                </Link>
+              )}
+
+              {/* 其余主题网格 */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {rest.map((tag) => (
+                  <Link key={tag.id} href={`/topics/${tag.slug}`} className="group block h-full">
+                    <article
+                      className="topic-card relative h-full flex flex-col p-6 border"
+                      style={{ background: "var(--t-bg-card)", borderColor: "var(--t-border)", borderRadius: "var(--t-radius)" }}
+                    >
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="topic-badge flex items-center justify-center w-12 h-12 text-2xl rounded-2xl shrink-0" aria-hidden>
+                          {tagIcons[tag.name] || "💬"}
+                        </div>
+                        <h3 className="text-lg font-bold truncate" style={{ color: "var(--t-text)" }}>{tag.name}</h3>
+                      </div>
+                      <p className="text-sm leading-relaxed mb-5 flex-1 line-clamp-2" style={{ color: "var(--t-text-secondary)" }}>
+                        {tag.description}
+                      </p>
+                      <div className="flex items-center justify-between pt-4 border-t" style={{ borderColor: "var(--t-border)" }}>
+                        <span className="inline-flex items-baseline gap-1 text-xs" style={{ color: "var(--t-text-muted)" }}>
+                          <span className="text-base font-bold" style={{ color: "var(--t-accent)" }}>{tag.quote_count}</span>
+                          条名言
+                        </span>
+                        <span className="topic-arrow text-lg" style={{ color: "var(--t-accent)" }} aria-hidden>→</span>
+                      </div>
+                    </article>
+                  </Link>
+                ))}
               </div>
-            </Link>
-          ))}
-        </div>
-      )}
+            </div>
+          );
+        })()}
     </>
   );
 }
