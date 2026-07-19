@@ -488,9 +488,20 @@ body {
   z-index: 4;
 }
 
+/* 大师头像点击：缩一下 + 主题色光环扩散 */
+.dq-avatar {
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
+}
+@keyframes dq-avatar-pop {
+  0%   { transform: scale(1);    box-shadow: 0 0 0 0 var(--t-accent); }
+  45%  { transform: scale(0.84); box-shadow: 0 0 0 5px var(--t-accent); }
+  100% { transform: scale(1);    box-shadow: 0 0 0 12px transparent; }
+}
+.dq-avatar:active { animation: dq-avatar-pop 0.4s ease-out; }
+
 /* 尊重减动偏好：关闭切换动效，直接换内容 */
 @media (prefers-reduced-motion: reduce) {
-  .dq-swap-out, .dq-swap-in, .dq-sweep, .dq-btn-spin, .dq-card-pulse, .dq-ripple {
+  .dq-swap-out, .dq-swap-in, .dq-sweep, .dq-btn-spin, .dq-card-pulse, .dq-ripple, .dq-avatar-pop {
     animation: none !important;
   }
   .dq-sweep, .dq-ripple { display: none; }

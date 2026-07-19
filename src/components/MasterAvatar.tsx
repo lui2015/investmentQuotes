@@ -42,13 +42,13 @@ export function MasterAvatar({
         alt={name}
         loading="lazy"
         decoding="async"
-        className={`${className} object-cover`.trim()}
+        className={`${className} dq-avatar object-cover`.trim()}
       />
     );
   }
   return (
     <div
-      className={`${className} flex items-center justify-center shrink-0`.trim()}
+      className={`${className} dq-avatar flex items-center justify-center shrink-0`.trim()}
       style={
         fallbackStyle ?? {
           background: `linear-gradient(135deg, var(--t-avatar-from), var(--t-avatar-to))`,
