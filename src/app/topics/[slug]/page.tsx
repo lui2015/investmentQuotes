@@ -38,23 +38,25 @@ export default async function TopicDetailPage({ params }: { params: Params }) {
 
       {/* Hero：渐变徽章 + 背景柔光 + 主题筛选 */}
       <header
-        className="topic-hero relative overflow-hidden border p-8 md:p-10 mb-10"
+        className="topic-feature relative overflow-hidden border p-8 md:p-10 mb-10"
         style={{
           background: "var(--t-bg-card)",
           borderColor: "var(--t-border)",
           borderRadius: "var(--t-radius)",
         }}
       >
-        <div
-          className="pointer-events-none absolute -top-16 -right-10 w-56 h-56 rounded-full"
-          style={{ background: "var(--t-accent-bg)", filter: "blur(8px)" }}
-          aria-hidden
-        />
+        <div className="feature-glow" aria-hidden />
         <div className="relative flex flex-col sm:flex-row sm:items-center gap-5">
           <div className="topic-hero-badge flex items-center justify-center w-16 h-16 text-3xl rounded-2xl shrink-0">
             {icon}
           </div>
           <div className="min-w-0">
+            <div
+              className="text-xs font-semibold tracking-widest uppercase mb-2"
+              style={{ color: "var(--t-accent)" }}
+            >
+              主题
+            </div>
             <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: "var(--t-text)" }}>
               {tag.name}
             </h1>
