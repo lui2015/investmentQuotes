@@ -329,22 +329,37 @@ body {
 }
 
 /* ============================================================
-   Topic (主题分类) 卡片 —— 单一 accent 主色，编辑式克制风格
+   Topic (主题分类) 卡片 —— 渐变徽章 + 顶部强调线 + 辉光悬停
    ============================================================ */
 .topic-card {
   transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.3s ease, box-shadow 0.3s ease;
+    border-color 0.3s ease, box-shadow 0.35s ease, background 0.3s ease;
+}
+/* 顶部强调色细线：默认收起，hover 由左向右展开 */
+.topic-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--t-accent), var(--t-accent-light));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 2;
 }
 /* 幽灵序号：大号衬线数字，低透明度装饰 */
 .topic-index {
-  font-size: 3.75rem;
+  font-size: 3.5rem;
   font-weight: 700;
-  opacity: 0.1;
+  opacity: 0.07;
   transition: opacity 0.35s ease, transform 0.35s ease;
 }
+/* 图标徽章：渐变底色 + 柔光，悬停微旋放大 */
 .topic-badge {
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.3s ease, background 0.3s ease;
+  background: linear-gradient(135deg, var(--t-avatar-from), var(--t-avatar-to));
+  box-shadow: 0 8px 20px -8px var(--t-glow);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.4s ease;
 }
 .topic-explore svg {
   transition: transform 0.3s ease;
@@ -352,18 +367,27 @@ body {
 .group:hover .topic-card {
   transform: translateY(-6px);
   border-color: var(--t-accent) !important;
-  box-shadow: 0 24px 48px -20px var(--t-shadow-color);
+  box-shadow: 0 22px 44px -18px var(--t-glow), 0 0 0 1px var(--t-accent-bg);
+}
+.group:hover .topic-card::before {
+  transform: scaleX(1);
 }
 .group:hover .topic-index {
-  opacity: 0.2;
+  opacity: 0.16;
   transform: translateY(2px);
 }
 .group:hover .topic-badge {
-  border-color: var(--t-accent);
-  transform: scale(1.06);
+  transform: scale(1.08) rotate(-4deg);
+  box-shadow: 0 12px 26px -8px var(--t-glow);
 }
 .group:hover .topic-explore svg {
-  transform: translateX(4px);
+  transform: translateX(5px);
+}
+
+/* 主题详情页 Hero —— 渐变徽章 + 背景柔光 */
+.topic-hero-badge {
+  background: linear-gradient(135deg, var(--t-avatar-from), var(--t-avatar-to));
+  box-shadow: 0 10px 26px -10px var(--t-glow);
 }
 
 /* ============================================================

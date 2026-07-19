@@ -20,9 +20,15 @@ export default function TopicsPage() {
   const totalQuotes = tags.reduce((sum, t) => sum + (t.quote_count || 0), 0);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+    <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+      {/* 页头背景柔光，提升层次 */}
+      <div
+        className="pointer-events-none absolute -top-10 -left-10 w-72 h-72 rounded-full"
+        style={{ background: "var(--t-accent-bg)", filter: "blur(10px)", opacity: 0.6 }}
+        aria-hidden
+      />
       {/* 页头 —— 编辑式排版，克制大气 */}
-      <header className="mb-12 md:mb-16">
+      <header className="relative mb-12 md:mb-16">
         <div
           className="inline-flex items-center gap-2 text-xs font-medium tracking-widest uppercase mb-5"
           style={{ color: "var(--t-accent)" }}
@@ -74,14 +80,10 @@ export default function TopicsPage() {
                 {String(i + 1).padStart(2, "0")}
               </span>
 
-              {/* 图标徽章：accent 微染，克制统一 */}
+              {/* 图标徽章：渐变底色 + 柔光，悬停微旋放大 */}
               <div
                 className="topic-badge flex items-center justify-center w-14 h-14 mb-6 text-2xl"
-                style={{
-                  background: "var(--t-accent-bg)",
-                  border: "1px solid var(--t-border)",
-                  borderRadius: "calc(var(--t-radius) + 0.35rem)",
-                }}
+                style={{ borderRadius: "calc(var(--t-radius) + 0.4rem)" }}
               >
                 {tagIcons[tag.name] || "💬"}
               </div>
