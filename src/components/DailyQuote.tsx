@@ -2,10 +2,12 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { Quote } from "@/lib/queries";
 import { MasterAvatar } from "./MasterAvatar";
 
 type Phase = "idle" | "out" | "in";
+type Ripple = { id: number; x: number; y: number; size: number };
 
 export function DailyQuote({ daily, pool }: { daily: Quote; pool: Quote[] }) {
   // 可循环的名言池：把当前每日推荐也加进来，方便来回切换
@@ -14,13 +16,15 @@ export function DailyQuote({ daily, pool }: { daily: Quote; pool: Quote[] }) {
     return [daily, ...pool];
   }, [daily, pool]);
 
+  const router = useRouter();
   const canSwap = all.length > 1;
 
-  // 当前展示的名言 + 动画阶段 + 触发计数
+  // 当前展示的名言 + 动画阶段 + 触发计数 + 水波纹
   const [shown, setShown] = useState<Quote>(daily);
   const [phase, setPhase] = useState<Phase>("idle");
   const [spinning, setSpinning] = useState(false);
   const [sweepKey, setSweepKey] = useState(0);
+  const [ripples, setRipples] = useState<Ripple[]>([]);
   const busy = useRef(false);
 
   const swap = useCallback(() => {
@@ -51,6 +55,26 @@ export function DailyQuote({ daily, pool }: { daily: Quote; pool: Quote[] }) {
 
   const animClass =
     phase === "out" ? "dq-swap-out" : phase === "in" ? "dq-swap-in" : "";
+
+  // 点击卡片：在指针位置生成水波纹，稍作停留后跳转到详情页（让动效可见）
+  const handleCardClick = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
+      const rect = e.currentTarget.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height) * 1.3;
+      const id = Date.now();
+      setRipples((rs) => [
+        ...rs,
+        { id, x: e.clientX - rect.left - size / 2, y: e.clientY - rect.top - size / 2, size },
+      ]);
+      window.setTimeout(() => router.push(`/quotes/${shown.id}`), 340);
+    },
+    [router, shown.id]
+  );
+
+  const removeRipple = useCallback((id: number) => {
+    setRipples((rs) => rs.filter((r) => r.id !== id));
+  }, []);
 
   return (
     <section className="mb-10 md:mb-14">
@@ -112,7 +136,11 @@ export function DailyQuote({ daily, pool }: { daily: Quote; pool: Quote[] }) {
         </div>
       </div>
 
-      <Link href={`/quotes/${shown.id}`} className="block group">
+      <Link
+        href={`/quotes/${shown.id}`}
+        onClick={handleCardClick}
+        className="block group active:scale-[0.985]"
+      >
         <div
           className={`relative p-6 md:p-8 border-2 transition-all duration-300 group-hover:shadow-2xl overflow-hidden ${
             phase !== "idle" ? "dq-card-pulse" : ""
@@ -127,6 +155,17 @@ export function DailyQuote({ daily, pool }: { daily: Quote; pool: Quote[] }) {
           {phase !== "idle" && (
             <span key={sweepKey} className="dq-sweep" aria-hidden />
           )}
+
+          {/* 点击卡片的水波纹 */}
+          {ripples.map((r) => (
+            <span
+              key={r.id}
+              className="dq-ripple"
+              aria-hidden
+              onAnimationEnd={() => removeRipple(r.id)}
+              style={{ left: r.x, top: r.y, width: r.size, height: r.size }}
+            />
+          ))}
 
           {/* 装饰大引号 */}
           <div
