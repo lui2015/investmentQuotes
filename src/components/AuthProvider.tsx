@@ -147,7 +147,7 @@ function AuthModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm rounded-2xl border border-white/10 bg-[var(--t-card)] p-6 shadow-2xl"
+        className="w-full max-w-sm rounded-2xl border border-[var(--t-border)] bg-[var(--t-bg-card)] p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-5 flex items-center justify-between">
@@ -157,7 +157,7 @@ function AuthModal({
           <button
             onClick={onClose}
             aria-label="关闭"
-            className="text-[var(--t-text-2)] transition hover:text-[var(--t-text)]"
+            className="text-[var(--t-text-secondary)] transition hover:text-[var(--t-text)]"
           >
             ✕
           </button>
@@ -172,7 +172,7 @@ function AuthModal({
             className={`rounded-lg py-2 text-sm font-medium transition ${
               mode === "login"
                 ? "bg-[var(--t-accent)] text-white"
-                : "text-[var(--t-text-2)]"
+                : "text-[var(--t-text-secondary)]"
             }`}
           >
             登录
@@ -185,14 +185,14 @@ function AuthModal({
             className={`rounded-lg py-2 text-sm font-medium transition ${
               mode === "register"
                 ? "bg-[var(--t-accent)] text-white"
-                : "text-[var(--t-text-2)]"
+                : "text-[var(--t-text-secondary)]"
             }`}
           >
             注册
           </button>
         </div>
 
-        <label className="mb-1 block text-sm text-[var(--t-text-2)]">
+        <label className="mb-1 block text-sm text-[var(--t-text-secondary)]">
           用户名
         </label>
         <input
@@ -200,10 +200,10 @@ function AuthModal({
           onChange={(e) => setUsername(e.target.value)}
           autoFocus
           placeholder="3-32 位"
-          className="mb-3 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2.5 text-[var(--t-text)] outline-none focus:border-[var(--t-accent)]"
+          className="mb-3 w-full rounded-xl border border-[var(--t-border)] bg-black/20 px-3 py-2.5 text-[var(--t-text)] outline-none focus:border-[var(--t-accent)]"
         />
 
-        <label className="mb-1 block text-sm text-[var(--t-text-2)]">
+        <label className="mb-1 block text-sm text-[var(--t-text-secondary)]">
           密码
         </label>
         <input
@@ -214,7 +214,7 @@ function AuthModal({
           onKeyDown={(e) => {
             if (e.key === "Enter") void submit();
           }}
-          className="mb-3 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2.5 text-[var(--t-text)] outline-none focus:border-[var(--t-accent)]"
+          className="mb-3 w-full rounded-xl border border-[var(--t-border)] bg-black/20 px-3 py-2.5 text-[var(--t-text)] outline-none focus:border-[var(--t-accent)]"
         />
 
         {error && (
@@ -229,7 +229,7 @@ function AuthModal({
           {loading ? "处理中…" : mode === "login" ? "登录" : "注册并登录"}
         </button>
 
-        <p className="mt-4 text-center text-xs text-[var(--t-text-2)]">
+        <p className="mt-4 text-center text-xs text-[var(--t-text-secondary)]">
           {mode === "login"
             ? "还没有账号？点击上方「注册」创建"
             : "注册后自动登录，收藏将保存在你的账号下"}

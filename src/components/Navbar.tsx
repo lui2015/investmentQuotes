@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { withBasePath } from "@/lib/basePath";
 import { useFavorites } from "./FavoritesProvider";
 import { useAuth } from "./AuthProvider";
@@ -24,11 +24,9 @@ export function Navbar() {
   const { isLoggedIn, isAdmin, openAuth, user, setUser } = useAuth();
   const settingsRef = useRef<HTMLDivElement>(null);
 
-  const handleFavoritesClick = (e: ReactMouseEvent) => {
-    if (!isLoggedIn) {
-      e.preventDefault();
-      openAuth();
-    }
+  const handleFavoritesClick = () => {
+    // 未登录时跳转到收藏页，由页面提示「登录可查看」，不再强制弹登录框
+    setOpen(false);
   };
 
   const handleLogout = async () => {
@@ -230,8 +228,8 @@ export function Navbar() {
             ))}
             <Link
               href="/favorites"
-              onClick={(e) => {
-                handleFavoritesClick(e);
+              onClick={() => {
+                handleFavoritesClick();
                 setOpen(false);
               }}
               className="flex items-center justify-between px-4 py-2.5 rounded-lg font-medium transition-colors"
