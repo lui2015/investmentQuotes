@@ -4,6 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { FavoritesProvider } from "@/components/FavoritesProvider";
+import { AuthProvider } from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
   title: "投资名言 — 让大师思想照亮投资道路",
@@ -23,11 +24,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="antialiased min-h-screen flex flex-col">
         <ThemeProvider>
-          <FavoritesProvider>
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </FavoritesProvider>
+          <AuthProvider>
+            <FavoritesProvider>
+              <Navbar />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </FavoritesProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

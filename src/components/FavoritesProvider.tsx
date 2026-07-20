@@ -1,8 +1,15 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
-
-const STORAGE_KEY = "iq-favorites";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+import { useAuth } from "./AuthProvider";
+import { withBasePath } from "@/lib/basePath";
 
 type FavoritesContextValue = {
   /** 收藏的 quote id 集合（顺序 = 收藏顺序，最近在前） */
@@ -12,7 +19,7 @@ type FavoritesContextValue = {
   toggleFavorite: (id: string) => boolean;
   removeFavorite: (id: string) => void;
   clear: () => void;
-  /** 首次从 localStorage 读取完成，渲染前为 false，避免水合不一致 */
+  /** 已根据登录态加载完成（用于避免水合不一致 / 错误提示时序） */
   hydrated: boolean;
 };
 
@@ -26,51 +33,32 @@ const FavoritesContext = createContext<FavoritesContextValue>({
   hydrated: false,
 });
 
-function readFromStorage(): string[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((v): v is string => typeof v === "string");
-  } catch {
-    return [];
-  }
-}
-
-function writeToStorage(ids: string[]) {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
-  } catch {
-    /* localStorage 可能因隐私模式 / 配额满而失败，忽略 */
-  }
-}
-
-export function FavoritesProvider({ children }: { children: React.ReactNode }) {
+export function FavoritesProvider({ children }: { children: ReactNode }) {
+  const { user, isLoggedIn, hydrated: authHydrated, openAuth } = useAuth();
   const [ids, setIds] = useState<string[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
-  // 首次挂载后从 localStorage 读取，避免 SSR/CSR 水合不一致
+  // 登录态变化后，从服务端加载 / 清空当前账号的收藏（所有 setState 都放在异步回调里，避免触发 set-state-in-effect 规则）
   useEffect(() => {
-    setIds(readFromStorage());
-    setHydrated(true);
-
-    // 跨标签页同步：storage 事件触发时重新读取
-    function handleStorage(e: StorageEvent) {
-      if (e.key === STORAGE_KEY) {
-        setIds(readFromStorage());
-      }
-    }
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
-  }, []);
-
-  const persist = useCallback((next: string[]) => {
-    setIds(next);
-    writeToStorage(next);
-  }, []);
+    if (!authHydrated) return;
+    let cancelled = false;
+    fetch(withBasePath("/api/favorites"), { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data: { code: number; ids?: string[] }) => {
+        if (cancelled) return;
+        if (data.code === 0 && Array.isArray(data.ids)) setIds(data.ids);
+        else setIds([]);
+      })
+      .catch(() => {
+        if (!cancelled) setIds([]);
+      })
+      .finally(() => {
+        if (!cancelled) setHydrated(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user, authHydrated]);
 
   const isFavorite = useCallback(
     (id: string) => ids.includes(id),
@@ -79,33 +67,56 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
 
   const toggleFavorite = useCallback(
     (id: string): boolean => {
-      let added = false;
-      setIds((prev) => {
-        if (prev.includes(id)) {
-          const next = prev.filter((x) => x !== id);
-          writeToStorage(next);
-          added = false;
-          return next;
-        }
-        // 最新收藏放在最前
-        const next = [id, ...prev];
-        writeToStorage(next);
-        added = true;
-        return next;
+      // 未登录：拦截并提示先登录
+      if (!isLoggedIn) {
+        openAuth();
+        return ids.includes(id);
+      }
+      const has = ids.includes(id);
+      const next = has ? ids.filter((x) => x !== id) : [id, ...ids];
+      setIds(next);
+      const opts = {
+        method: has ? "DELETE" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quoteId: id }),
+      };
+      fetch(withBasePath("/api/favorites"), opts).catch(() => {
+        // 失败则回滚到改动前状态
+        setIds(ids);
       });
-      return added;
+      return !has;
     },
-    [],
+    [isLoggedIn, ids, openAuth],
   );
 
   const removeFavorite = useCallback(
     (id: string) => {
-      persist(ids.filter((x) => x !== id));
+      if (!isLoggedIn) {
+        openAuth();
+        return;
+      }
+      setIds((prev) => prev.filter((x) => x !== id));
+      fetch(withBasePath("/api/favorites"), {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quoteId: id }),
+      }).catch(() => {});
     },
-    [ids, persist],
+    [isLoggedIn, openAuth],
   );
 
-  const clear = useCallback(() => persist([]), [persist]);
+  const clear = useCallback(() => {
+    if (!isLoggedIn) {
+      openAuth();
+      return;
+    }
+    setIds([]);
+    fetch(withBasePath("/api/favorites"), {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    }).catch(() => {});
+  }, [isLoggedIn, openAuth]);
 
   return (
     <FavoritesContext.Provider

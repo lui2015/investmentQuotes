@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useFavorites } from "./FavoritesProvider";
+import { useAuth } from "./AuthProvider";
 
 type Variant = "primary" | "compact";
 
@@ -13,19 +14,20 @@ export function FavoriteButton({
   variant?: Variant;
 }) {
   const { isFavorite, toggleFavorite, hydrated } = useFavorites();
-  // 客户端水合前的占位状态，避免文本/图标在 SSR 与 CSR 间跳变
-  const [active, setActive] = useState(false);
+  const { isLoggedIn, openAuth } = useAuth();
+  // 收藏状态直接由上下文派生（ids 更新即同步反映），无需额外 effect
+  const active = hydrated ? isFavorite(quoteId) : false;
   const [pulse, setPulse] = useState(false);
-
-  useEffect(() => {
-    if (hydrated) setActive(isFavorite(quoteId));
-  }, [hydrated, isFavorite, quoteId]);
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const nowActive = toggleFavorite(quoteId);
-    setActive(nowActive);
+    // 未登录：拦截并提示先登录，不触发收藏动画
+    if (!isLoggedIn) {
+      openAuth();
+      return;
+    }
+    toggleFavorite(quoteId);
     setPulse(true);
     setTimeout(() => setPulse(false), 400);
   };

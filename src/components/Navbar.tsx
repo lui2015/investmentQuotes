@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { withBasePath } from "@/lib/basePath";
 import { useFavorites } from "./FavoritesProvider";
+import { useAuth } from "./AuthProvider";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 
 const PRIMARY_LINKS = [
@@ -20,7 +21,25 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { count, hydrated } = useFavorites();
+  const { isLoggedIn, openAuth, user, setUser } = useAuth();
   const settingsRef = useRef<HTMLDivElement>(null);
+
+  const handleFavoritesClick = (e: ReactMouseEvent) => {
+    if (!isLoggedIn) {
+      e.preventDefault();
+      openAuth();
+    }
+  };
+
+  const handleLogout = async () => {
+    setSettingsOpen(false);
+    try {
+      await fetch(withBasePath("/api/auth/logout"), { method: "POST" });
+    } catch {
+      /* 忽略网络错误，本地仍视为已退出 */
+    }
+    setUser(null);
+  };
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -64,6 +83,7 @@ export function Navbar() {
 
             <Link
               href="/favorites"
+              onClick={handleFavoritesClick}
               className="font-medium transition-colors duration-200 inline-flex items-center gap-1.5"
               style={{ color: "var(--t-text-secondary)" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t-accent)")}
@@ -132,6 +152,47 @@ export function Navbar() {
                       <span>{link.label}</span>
                     </Link>
                   ))}
+
+                  {isLoggedIn ? (
+                    <button
+                      onClick={() => void handleLogout()}
+                      role="menuitem"
+                      className="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200"
+                      style={{ color: "var(--t-text-secondary)" }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = "var(--t-bg-tag)";
+                        e.currentTarget.style.color = "var(--t-accent)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "transparent";
+                        e.currentTarget.style.color = "var(--t-text-secondary)";
+                      }}
+                    >
+                      <span aria-hidden>🚪</span>
+                      <span>退出登录{user ? `（${user.username}）` : ""}</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setSettingsOpen(false);
+                        openAuth();
+                      }}
+                      role="menuitem"
+                      className="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200"
+                      style={{ color: "var(--t-text-secondary)" }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = "var(--t-bg-tag)";
+                        e.currentTarget.style.color = "var(--t-accent)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "transparent";
+                        e.currentTarget.style.color = "var(--t-text-secondary)";
+                      }}
+                    >
+                      <span aria-hidden>🔑</span>
+                      <span>登录 / 注册</span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -167,7 +228,10 @@ export function Navbar() {
             ))}
             <Link
               href="/favorites"
-              onClick={() => setOpen(false)}
+              onClick={(e) => {
+                handleFavoritesClick(e);
+                setOpen(false);
+              }}
               className="flex items-center justify-between px-4 py-2.5 rounded-lg font-medium transition-colors"
               style={{ color: "var(--t-text)" }}
             >

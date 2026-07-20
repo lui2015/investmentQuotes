@@ -133,6 +133,37 @@ export function initDb() {
     CREATE INDEX IF NOT EXISTS idx_api_log_endpoint ON api_call_log(endpoint);
     CREATE INDEX IF NOT EXISTS idx_api_log_called_at ON api_call_log(called_at);
     CREATE INDEX IF NOT EXISTS idx_interp_created ON quote_interpretations(created_at);
+
+    -- 账号体系：注册用户
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      username TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    -- 登录会话（token -> user）
+    CREATE TABLE IF NOT EXISTS sessions (
+      token TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      expires_at TEXT NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+
+    -- 用户收藏（按账号隔离，替代原来的浏览器本地收藏）
+    CREATE TABLE IF NOT EXISTS user_favorites (
+      user_id TEXT NOT NULL,
+      quote_id TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      PRIMARY KEY (user_id, quote_id),
+      FOREIGN KEY (user_id) REFERENCES users(id),
+      FOREIGN KEY (quote_id) REFERENCES quotes(id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
+    CREATE INDEX IF NOT EXISTS idx_favorites_user ON user_favorites(user_id);
+    CREATE INDEX IF NOT EXISTS idx_favorites_quote ON user_favorites(quote_id);
   `);
 
   return db;

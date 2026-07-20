@@ -1,42 +1,47 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useFavorites } from "@/components/FavoritesProvider";
+import { useAuth } from "@/components/AuthProvider";
 import { withBasePath } from "@/lib/basePath";
 import { MasterAvatar } from "@/components/MasterAvatar";
 import type { Quote } from "@/lib/queries";
 
 export default function FavoritesPage() {
   const { ids, hydrated, clear } = useFavorites();
+  const { isLoggedIn, openAuth } = useAuth();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(false);
   const [notFoundIds, setNotFoundIds] = useState<string[]>([]);
   const [confirmingClear, setConfirmingClear] = useState(false);
 
-  const loadQuotes = useCallback(async (currentIds: string[]) => {
-    if (currentIds.length === 0) {
-      setQuotes([]);
-      setNotFoundIds([]);
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await fetch(
-        withBasePath(`/api/quotes?ids=${encodeURIComponent(currentIds.join(","))}`),
-      );
-      const data: Quote[] = await res.json();
-      setQuotes(data);
-      const returnedIds = new Set(data.map((q) => q.id));
-      setNotFoundIds(currentIds.filter((id) => !returnedIds.has(id)));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
+  // 登录态 / 收藏列表变化后加载名言详情（setState 均放在异步回调中，规避 set-state-in-effect 规则）
   useEffect(() => {
-    if (hydrated) loadQuotes(ids);
-  }, [ids, hydrated, loadQuotes]);
+    if (!hydrated) return;
+    if (ids.length === 0) return; // 空列表由 ids 驱动 UI，无需手动清 state
+    let cancelled = false;
+    // 用微任务触发 loading，避免 effect 内同步 setState
+    queueMicrotask(() => {
+      if (!cancelled) setLoading(true);
+    });
+    fetch(
+      withBasePath(`/api/quotes?ids=${encodeURIComponent(ids.join(","))}`),
+    )
+      .then((r) => r.json())
+      .then((data: Quote[]) => {
+        if (cancelled) return;
+        setQuotes(data);
+        const returnedIds = new Set(data.map((q) => q.id));
+        setNotFoundIds(ids.filter((id) => !returnedIds.has(id)));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [ids, hydrated]);
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
@@ -67,15 +72,17 @@ export default function FavoritesPage() {
           )}
         </div>
         <p style={{ color: "var(--t-text-secondary)" }} className="text-sm">
-          收藏会保存在当前浏览器。换浏览器或清除浏览数据会丢失。
+          收藏保存在你的账号下，登录后即可查看，换设备也不丢失。
         </p>
       </header>
 
       {!hydrated && <Placeholder>正在读取收藏…</Placeholder>}
 
-      {hydrated && ids.length === 0 && <EmptyState />}
+      {hydrated && !isLoggedIn && <LoginPrompt onLogin={openAuth} />}
 
-      {hydrated && ids.length > 0 && (
+      {hydrated && isLoggedIn && ids.length === 0 && <EmptyState />}
+
+      {hydrated && isLoggedIn && ids.length > 0 && (
         <>
           <div className="flex items-center justify-end mb-6">
             {confirmingClear ? (
@@ -217,6 +224,44 @@ function FavoriteQuoteCard({ quote }: { quote: Quote }) {
         </div>
       </div>
     </Link>
+  );
+}
+
+function LoginPrompt({ onLogin }: { onLogin: () => void }) {
+  return (
+    <div
+      className="p-12 text-center border"
+      style={{
+        background: "var(--t-bg-card)",
+        borderColor: "var(--t-border)",
+        borderRadius: "var(--t-radius)",
+      }}
+    >
+      <div className="text-5xl mb-4" aria-hidden>🔒</div>
+      <h2
+        className="text-lg font-semibold mb-2"
+        style={{ color: "var(--t-text)" }}
+      >
+        请先登录后查看收藏
+      </h2>
+      <p
+        className="text-sm mb-6"
+        style={{ color: "var(--t-text-secondary)" }}
+      >
+        登录或注册账号后，收藏会与你的账号绑定，随时查看。
+      </p>
+      <button
+        onClick={onLogin}
+        className="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-medium transition-all hover:scale-105"
+        style={{
+          background: "var(--t-accent)",
+          color: "var(--t-bg)",
+          borderRadius: "var(--t-radius)",
+        }}
+      >
+        登录 / 注册
+      </button>
+    </div>
   );
 }
 
