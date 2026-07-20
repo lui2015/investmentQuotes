@@ -10,11 +10,12 @@ import {
 } from "react";
 import { withBasePath } from "@/lib/basePath";
 
-type User = { id: string; username: string };
+type User = { id: string; username: string; isAdmin: boolean };
 
 type AuthContextValue = {
   user: User | null;
   isLoggedIn: boolean;
+  isAdmin: boolean;
   hydrated: boolean;
   modalOpen: boolean;
   openAuth: () => void;
@@ -52,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+
   // 内联拉取当前会话（直接写在 effect 内，避免调用外部函数触发 set-state-in-effect 规则）
   useEffect(() => {
     let cancelled = false;
@@ -79,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         isLoggedIn: !!user,
+        isAdmin: !!user?.isAdmin,
         hydrated,
         modalOpen,
         openAuth,

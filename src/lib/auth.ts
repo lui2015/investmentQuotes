@@ -8,6 +8,7 @@ export const SESSION_COOKIE = "iq_session";
 export interface AuthUser {
   id: string;
   username: string;
+  isAdmin: boolean;
 }
 
 // ---------- 密码哈希（scrypt，Node 内置，无需额外依赖） ----------
@@ -40,9 +41,9 @@ export function registerUser(username: string, password: string): AuthUser {
   }
   const id = crypto.randomUUID();
   db.prepare(
-    "INSERT INTO users (id, username, password_hash) VALUES (?, ?, ?)",
+    "INSERT INTO users (id, username, password_hash, is_admin) VALUES (?, ?, ?, 0)",
   ).run(id, username, hashPassword(password));
-  return { id, username };
+  return { id, username, isAdmin: false };
 }
 
 export function authenticateUser(
@@ -52,13 +53,37 @@ export function authenticateUser(
   initDb();
   const db = getDb();
   const row = db
-    .prepare("SELECT id, username, password_hash FROM users WHERE username = ?")
+    .prepare(
+      "SELECT id, username, password_hash, is_admin FROM users WHERE username = ?",
+    )
     .get(username) as
-    | { id: string; username: string; password_hash: string }
+    | { id: string; username: string; password_hash: string; is_admin: number }
     | undefined;
   if (!row) return null;
   if (!verifyPassword(password, row.password_hash)) return null;
-  return { id: row.id, username: row.username };
+  return { id: row.id, username: row.username, isAdmin: row.is_admin === 1 };
+}
+
+// ---------- 管理员账号（幂等初始化） ----------
+let adminSeeded = false;
+export function ensureAdminUser(): void {
+  if (adminSeeded) return;
+  initDb();
+  const db = getDb();
+  const ADMIN_USER = "luli";
+  const ADMIN_PASS = "luli116574";
+  const existing = db
+    .prepare("SELECT id, is_admin FROM users WHERE username = ?")
+    .get(ADMIN_USER) as { id: string; is_admin: number } | undefined;
+  if (!existing) {
+    const id = crypto.randomUUID();
+    db.prepare(
+      "INSERT INTO users (id, username, password_hash, is_admin) VALUES (?, ?, ?, 1)",
+    ).run(id, ADMIN_USER, hashPassword(ADMIN_PASS));
+  } else if (existing.is_admin !== 1) {
+    db.prepare("UPDATE users SET is_admin = 1 WHERE id = ?").run(existing.id);
+  }
+  adminSeeded = true;
 }
 
 // ---------- 会话 ----------
@@ -91,9 +116,13 @@ export function getUserBySession(token: string | undefined): AuthUser | null {
     return null;
   }
   const user = db
-    .prepare("SELECT id, username FROM users WHERE id = ?")
-    .get(session.user_id) as { id: string; username: string } | undefined;
-  return user ? { id: user.id, username: user.username } : null;
+    .prepare("SELECT id, username, is_admin FROM users WHERE id = ?")
+    .get(session.user_id) as
+    | { id: string; username: string; is_admin: number }
+    | undefined;
+  return user
+    ? { id: user.id, username: user.username, isAdmin: user.is_admin === 1 }
+    : null;
 }
 
 export function deleteSession(token: string): void {

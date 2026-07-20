@@ -21,7 +21,7 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { count, hydrated } = useFavorites();
-  const { isLoggedIn, openAuth, user, setUser } = useAuth();
+  const { isLoggedIn, isAdmin, openAuth, user, setUser } = useAuth();
   const settingsRef = useRef<HTMLDivElement>(null);
 
   const handleFavoritesClick = (e: ReactMouseEvent) => {
@@ -105,6 +105,7 @@ export function Navbar() {
 
           <div className="flex items-center gap-3">
             <ThemeSwitcher />
+            {isAdmin && (
             <div ref={settingsRef} className="relative">
               <button
                 onClick={() => setSettingsOpen(!settingsOpen)}
@@ -196,6 +197,7 @@ export function Navbar() {
                 </div>
               )}
             </div>
+            )}
             <button
               onClick={() => setOpen(!open)}
               className="md:hidden p-2 rounded-lg transition-colors"

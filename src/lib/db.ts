@@ -134,11 +134,12 @@ export function initDb() {
     CREATE INDEX IF NOT EXISTS idx_api_log_called_at ON api_call_log(called_at);
     CREATE INDEX IF NOT EXISTS idx_interp_created ON quote_interpretations(created_at);
 
-    -- 账号体系：注册用户
+    -- 账号体系：注册用户（is_admin=1 为管理员）
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       username TEXT NOT NULL UNIQUE,
       password_hash TEXT NOT NULL,
+      is_admin INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
@@ -164,7 +165,17 @@ export function initDb() {
     CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
     CREATE INDEX IF NOT EXISTS idx_favorites_user ON user_favorites(user_id);
     CREATE INDEX IF NOT EXISTS idx_favorites_quote ON user_favorites(quote_id);
+
+    -- 兼容旧库：补充 is_admin 列
+    ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0;
   `);
+
+  // 确保管理员账号存在（懒加载，避免与 auth 形成循环依赖）
+  if (typeof (globalThis as Record<string, unknown>).__iqAdminSeed === "undefined") {
+    (globalThis as Record<string, unknown>).__iqAdminSeed = import("./auth")
+      .then((m) => m.ensureAdminUser())
+      .catch((e) => console.error("[seed] 管理员账号初始化失败", e));
+  }
 
   return db;
 }
