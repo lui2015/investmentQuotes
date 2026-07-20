@@ -165,10 +165,14 @@ export function initDb() {
     CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
     CREATE INDEX IF NOT EXISTS idx_favorites_user ON user_favorites(user_id);
     CREATE INDEX IF NOT EXISTS idx_favorites_quote ON user_favorites(quote_id);
-
-    -- 兼容旧库：补充 is_admin 列（已存在则跳过）
-    ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin INTEGER NOT NULL DEFAULT 0;
   `);
+
+  // 兼容旧库：若 users 表缺少 is_admin 列则补充（低版本 SQLite 不支持 ADD COLUMN IF NOT EXISTS）
+  try {
+    db.exec("ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0");
+  } catch {
+    /* 列已存在则忽略 */
+  }
 
   // 确保管理员账号存在（懒加载，避免与 auth 形成循环依赖）
   if (typeof (globalThis as Record<string, unknown>).__iqAdminSeed === "undefined") {
