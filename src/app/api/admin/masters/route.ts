@@ -17,6 +17,8 @@ export async function GET(_request: NextRequest) {
     name_cn: m.name_cn,
     name_en: m.name_en,
     title: m.title,
+    avatar_url: m.avatar_url,
+    quote_count: m.quote_count ?? 0,
   }));
   return NextResponse.json(masters);
 }

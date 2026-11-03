@@ -92,20 +92,21 @@ INSERT OR IGNORE INTO masters (id, name_cn, name_en, avatar_url, title, bio, bor
 `;
 db.exec(insertMastersSQL);
 
-// Update avatar_url for masters that have avatars (only if currently NULL)
+// 初始化默认头像：仅在尚未设置头像时写入。
+// 必须带 avatar_url IS NULL/'' 条件，否则每次容器启动都会覆盖管理员上传的自定义头像。
 const updateAvatarsSQL = `
-UPDATE masters SET avatar_url = '/avatars/buffett.png' WHERE id = 'm-buffett' AND avatar_url IS NULL;
-UPDATE masters SET avatar_url = '/avatars/munger.png' WHERE id = 'm-munger' AND avatar_url IS NULL;
-UPDATE masters SET avatar_url = '/avatars/graham.png' WHERE id = 'm-graham';
-UPDATE masters SET avatar_url = '/avatars/soros.png' WHERE id = 'm-soros';
-UPDATE masters SET avatar_url = '/avatars/marks.png' WHERE id = 'm-marks';
-UPDATE masters SET avatar_url = '/avatars/lynch.png' WHERE id = 'm-lynch';
-UPDATE masters SET avatar_url = '/avatars/dalio.png' WHERE id = 'm-dalio';
-UPDATE masters SET avatar_url = '/avatars/livermore.png' WHERE id = 'm-livermore';
-UPDATE masters SET avatar_url = '/avatars/taleb.png' WHERE id = 'm-taleb';
-UPDATE masters SET avatar_url = '/avatars/bogle.png' WHERE id = 'm-bogle';
-UPDATE masters SET avatar_url = '/avatars/fisher.png' WHERE id = 'm-fisher';
-UPDATE masters SET avatar_url = '/avatars/klarman.png' WHERE id = 'm-klarman';
+UPDATE masters SET avatar_url = '/avatars/buffett.png' WHERE id = 'm-buffett' AND (avatar_url IS NULL OR avatar_url = '');
+UPDATE masters SET avatar_url = '/avatars/munger.png' WHERE id = 'm-munger' AND (avatar_url IS NULL OR avatar_url = '');
+UPDATE masters SET avatar_url = '/avatars/graham.png' WHERE id = 'm-graham' AND (avatar_url IS NULL OR avatar_url = '');
+UPDATE masters SET avatar_url = '/avatars/soros.png' WHERE id = 'm-soros' AND (avatar_url IS NULL OR avatar_url = '');
+UPDATE masters SET avatar_url = '/avatars/marks.png' WHERE id = 'm-marks' AND (avatar_url IS NULL OR avatar_url = '');
+UPDATE masters SET avatar_url = '/avatars/lynch.png' WHERE id = 'm-lynch' AND (avatar_url IS NULL OR avatar_url = '');
+UPDATE masters SET avatar_url = '/avatars/dalio.png' WHERE id = 'm-dalio' AND (avatar_url IS NULL OR avatar_url = '');
+UPDATE masters SET avatar_url = '/avatars/livermore.png' WHERE id = 'm-livermore' AND (avatar_url IS NULL OR avatar_url = '');
+UPDATE masters SET avatar_url = '/avatars/taleb.png' WHERE id = 'm-taleb' AND (avatar_url IS NULL OR avatar_url = '');
+UPDATE masters SET avatar_url = '/avatars/bogle.png' WHERE id = 'm-bogle' AND (avatar_url IS NULL OR avatar_url = '');
+UPDATE masters SET avatar_url = '/avatars/fisher.png' WHERE id = 'm-fisher' AND (avatar_url IS NULL OR avatar_url = '');
+UPDATE masters SET avatar_url = '/avatars/klarman.png' WHERE id = 'm-klarman' AND (avatar_url IS NULL OR avatar_url = '');
 `;
 db.exec(updateAvatarsSQL);
 

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { withBasePath } from "@/lib/basePath";
+import { MasterAvatar } from "@/components/MasterAvatar";
 import type { Interpretation, Quote } from "@/lib/queries";
 
 interface ListResponse {
@@ -43,6 +44,7 @@ export default function AdminQuotesPage() {
   const toastIdRef = useRef(0);
   const exportingRef = useRef(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [avatarOpen, setAvatarOpen] = useState(false);
 
   const pushToast = useCallback((kind: ToastKind, message: string) => {
     const id = ++toastIdRef.current;
@@ -191,6 +193,17 @@ export default function AdminQuotesPage() {
               }}
             >
               📤 导入 Excel（替换线上数据）
+            </button>
+            <button
+              onClick={() => setAvatarOpen(true)}
+              className="px-4 py-2 text-sm font-medium rounded-md border transition-all hover:opacity-90"
+              style={{
+                background: "var(--t-bg-card)",
+                color: "var(--t-text)",
+                borderColor: "var(--t-border)",
+              }}
+            >
+              🖼️ 头像编辑
             </button>
           </div>
         </div>
@@ -436,6 +449,13 @@ export default function AdminQuotesPage() {
             loadQuotes(1);
             pushToast("success", message);
           }}
+        />
+      )}
+
+      {avatarOpen && (
+        <AvatarEditorModal
+          onClose={() => setAvatarOpen(false)}
+          onToast={pushToast}
         />
       )}
 
@@ -990,6 +1010,318 @@ function ConfirmDeleteModal({ quote, onClose, onDeleted, onError }: ConfirmDelet
             style={{ background: "#dc2626", color: "#fff" }}
           >
             {deleting ? "删除中…" : "确认删除"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface AvatarMaster {
+  id: string;
+  name_cn: string;
+  name_en: string | null;
+  title: string | null;
+  avatar_url: string | null;
+  quote_count: number;
+}
+
+interface AvatarEditorModalProps {
+  onClose: () => void;
+  onToast: (kind: ToastKind, message: string) => void;
+}
+
+function avatarStatus(url: string | null): string {
+  if (!url) return "未设置头像";
+  if (url.startsWith("/api/avatars/")) return "自定义头像";
+  if (url.startsWith("/avatars/")) return "默认头像";
+  return "自定义头像";
+}
+
+function AvatarEditorModal({ onClose, onToast }: AvatarEditorModalProps) {
+  const [masters, setMasters] = useState<AvatarMaster[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
+  const [pending, setPending] = useState<
+    Record<string, { file: File; preview: string }>
+  >({});
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const previewsRef = useRef<string[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(withBasePath("/api/admin/masters"));
+        if (!res.ok) throw new Error(`加载失败 (${res.status})`);
+        const data = (await res.json()) as AvatarMaster[];
+        if (!cancelled) setMasters(data);
+      } catch (err) {
+        if (!cancelled) {
+          onToast("error", err instanceof Error ? err.message : "加载大师列表失败");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [onToast]);
+
+  useEffect(() => {
+    return () => {
+      for (const url of previewsRef.current) URL.revokeObjectURL(url);
+      previewsRef.current = [];
+    };
+  }, []);
+
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [onClose]);
+
+  const releasePreview = (id: string) => {
+    const prev = pending[id];
+    if (prev) {
+      URL.revokeObjectURL(prev.preview);
+      previewsRef.current = previewsRef.current.filter(
+        (url) => url !== prev.preview,
+      );
+      setPending((p) => {
+        const next = { ...p };
+        delete next[id];
+        return next;
+      });
+    }
+  };
+
+  const handlePick = (id: string, file: File | null) => {
+    if (!file) return;
+    if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type)) {
+      onToast("error", "仅支持 PNG / JPG / WebP / GIF 图片");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      onToast("error", "图片过大，上限 2MB");
+      return;
+    }
+    releasePreview(id);
+    const preview = URL.createObjectURL(file);
+    previewsRef.current.push(preview);
+    setPending((p) => ({ ...p, [id]: { file, preview } }));
+  };
+
+  const handleSave = async (master: AvatarMaster) => {
+    const item = pending[master.id];
+    if (!item || savingId) return;
+    setSavingId(master.id);
+    try {
+      const res = await fetch(
+        withBasePath(
+          `/api/admin/masters/avatar?masterId=${encodeURIComponent(master.id)}`,
+        ),
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": item.file.type || "application/octet-stream",
+          },
+          body: item.file,
+        },
+      );
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        avatarUrl?: string;
+      };
+      if (!res.ok) {
+        onToast("error", data.error || `保存失败 (${res.status})`);
+        return;
+      }
+      setMasters((list) =>
+        list.map((m) =>
+          m.id === master.id
+            ? { ...m, avatar_url: data.avatarUrl ?? m.avatar_url }
+            : m,
+        ),
+      );
+      releasePreview(master.id);
+      onToast("success", `已更新「${master.name_cn}」的头像`);
+    } catch (err) {
+      onToast(
+        "error",
+        `保存失败：${err instanceof Error ? err.message : String(err)}`,
+      );
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  const keyword = query.trim().toLowerCase();
+  const filtered = masters.filter(
+    (m) =>
+      !keyword ||
+      m.name_cn.toLowerCase().includes(keyword) ||
+      (m.name_en ?? "").toLowerCase().includes(keyword),
+  );
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0, 0, 0, 0.5)" }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        className="w-full max-w-3xl max-h-[90vh] overflow-y-auto border"
+        style={{
+          background: "var(--t-bg-card)",
+          borderColor: "var(--t-border)",
+          borderRadius: "var(--t-radius)",
+        }}
+        role="dialog"
+        aria-modal="true"
+      >
+        <div
+          className="px-6 py-4 border-b flex items-center justify-between"
+          style={{ borderColor: "var(--t-border)" }}
+        >
+          <h2 className="text-lg font-bold" style={{ color: "var(--t-text)" }}>
+            头像编辑
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-2xl leading-none transition-opacity hover:opacity-70"
+            style={{ color: "var(--t-text-muted)" }}
+            aria-label="关闭"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="p-6 space-y-4">
+          <p className="text-sm" style={{ color: "var(--t-text-secondary)" }}>
+            为大师添加或更换头像。图片保存在服务器数据目录，容器重启或重新部署后依然保留；
+            支持 PNG / JPG / WebP / GIF，单张不超过 2MB。
+          </p>
+
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="搜索大师中文名 / 英文名…"
+            className="w-full px-3 py-2 rounded-md border text-sm outline-none focus:ring-2 transition-all"
+            style={{
+              background: "var(--t-bg)",
+              color: "var(--t-text)",
+              borderColor: "var(--t-border)",
+            }}
+          />
+
+          {loading ? (
+            <p className="text-sm py-8 text-center" style={{ color: "var(--t-text-muted)" }}>
+              加载中…
+            </p>
+          ) : (
+            <div className="max-h-[55vh] overflow-y-auto">
+              {filtered.length === 0 && (
+                <p className="text-sm py-8 text-center" style={{ color: "var(--t-text-muted)" }}>
+                  没有匹配的大师
+                </p>
+              )}
+              {filtered.map((m) => {
+                const item = pending[m.id];
+                return (
+                  <div
+                    key={m.id}
+                    className="flex flex-wrap items-center gap-3 py-3 border-t"
+                    style={{ borderColor: "var(--t-border)" }}
+                  >
+                    <MasterAvatar
+                      name={m.name_cn}
+                      avatarUrl={item?.preview ?? m.avatar_url}
+                      className="w-12 h-12 rounded-full text-white font-bold text-lg shrink-0"
+                    />
+                    <div className="min-w-[140px] flex-1">
+                      <p className="text-sm font-medium" style={{ color: "var(--t-text)" }}>
+                        {m.name_cn}
+                      </p>
+                      <p className="text-xs" style={{ color: "var(--t-text-muted)" }}>
+                        {m.name_en || "—"} · {m.quote_count} 条名言 ·{" "}
+                        {avatarStatus(m.avatar_url)}
+                      </p>
+                      {item && (
+                        <p className="text-xs mt-0.5 truncate" style={{ color: "var(--t-accent)" }}>
+                          待上传：{item.file.name}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        id={`avatar-file-${m.id}`}
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp,image/gif"
+                        className="hidden"
+                        onChange={(e) => {
+                          handlePick(m.id, e.target.files?.[0] ?? null);
+                          e.target.value = "";
+                        }}
+                      />
+                      <label
+                        htmlFor={`avatar-file-${m.id}`}
+                        className="px-3 py-1.5 text-xs font-medium rounded-md cursor-pointer transition-all hover:opacity-90"
+                        style={{
+                          background: "var(--t-bg-tag)",
+                          color: "var(--t-text)",
+                        }}
+                      >
+                        选择图片
+                      </label>
+                      {item && (
+                        <button
+                          type="button"
+                          onClick={() => releasePreview(m.id)}
+                          className="px-2 py-1.5 text-xs rounded-md transition-colors"
+                          style={{
+                            background: "var(--t-bg-tag)",
+                            color: "var(--t-text-muted)",
+                          }}
+                          title="取消选择"
+                        >
+                          ✕
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleSave(m)}
+                        disabled={!item || savingId !== null}
+                        className="px-3 py-1.5 text-xs font-medium rounded-md transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                        style={{ background: "var(--t-accent)", color: "var(--t-bg)" }}
+                      >
+                        {savingId === m.id ? "上传中…" : "保存"}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <div
+          className="flex items-center justify-end px-6 py-3 border-t"
+          style={{ borderColor: "var(--t-border)" }}
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium rounded-md transition-colors"
+            style={{ background: "var(--t-bg-tag)", color: "var(--t-text)" }}
+          >
+            完成
           </button>
         </div>
       </div>
