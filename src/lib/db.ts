@@ -19,6 +19,22 @@ export function getDb(): Database.Database {
   return _db;
 }
 
+/**
+ * 名言数据是否已由 Excel 导入接管。
+ * 接管后 seed 的自愈逻辑（固定 id 的种子名言 / 大师去重 / 全量初始化）必须跳过，
+ * 否则每次查询都会把被替换掉的种子名言重新插回库里。
+ */
+export function isImportedData(): boolean {
+  try {
+    const row = getDb()
+      .prepare("SELECT value FROM app_settings WHERE key = 'data_source'")
+      .get() as { value: string } | undefined;
+    return row?.value === "import";
+  } catch {
+    return false;
+  }
+}
+
 export function initDb() {
   const db = getDb();
 
@@ -133,6 +149,13 @@ export function initDb() {
     CREATE INDEX IF NOT EXISTS idx_api_log_endpoint ON api_call_log(endpoint);
     CREATE INDEX IF NOT EXISTS idx_api_log_called_at ON api_call_log(called_at);
     CREATE INDEX IF NOT EXISTS idx_interp_created ON quote_interpretations(created_at);
+
+    -- 应用级配置：data_source=import 表示名言数据已由 Excel 导入接管
+    CREATE TABLE IF NOT EXISTS app_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
 
     -- 账号体系：注册用户（is_admin=1 为管理员）
     CREATE TABLE IF NOT EXISTS users (

@@ -1,4 +1,4 @@
-import { initDb } from "./db";
+import { initDb, isImportedData } from "./db";
 import { v4 } from "./uuid";
 import { normalizeText } from "./similarity";
 
@@ -278,6 +278,10 @@ const duanQuotes = [
 
 export function seedData() {
   const db = initDb();
+
+  // 名言数据已由 Excel 导入接管：跳过所有 seed / 自愈写入。
+  // 否则「大师自愈」会用固定 id 重新插入种子名言，导致刚导入的数据被污染。
+  if (isImportedData()) return;
 
   // 头像自愈：保证关键大师头像在数据库里有值（idempotent，幂等）
   // 放在 masterCount 检查之前，确保生产库已有数据时也能修复 avatar_url

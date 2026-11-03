@@ -42,6 +42,7 @@ export default function AdminQuotesPage() {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const toastIdRef = useRef(0);
   const exportingRef = useRef(false);
+  const [importOpen, setImportOpen] = useState(false);
 
   const pushToast = useCallback((kind: ToastKind, message: string) => {
     const id = ++toastIdRef.current;
@@ -172,13 +173,26 @@ export default function AdminQuotesPage() {
           <p className="text-sm" style={{ color: "var(--t-text-secondary)" }}>
             编辑或删除现有名言。共 <strong>{total}</strong> 条记录。
           </p>
-          <button
-            onClick={handleExport}
-            className="px-4 py-2 text-sm font-medium rounded-md transition-all hover:opacity-90"
-            style={{ background: "var(--t-accent)", color: "var(--t-bg)" }}
-          >
-            📥 一键导出 Excel
-          </button>
+          <div className="flex flex-wrap items-center gap-2 mt-3">
+            <button
+              onClick={handleExport}
+              className="px-4 py-2 text-sm font-medium rounded-md transition-all hover:opacity-90"
+              style={{ background: "var(--t-accent)", color: "var(--t-bg)" }}
+            >
+              📥 一键导出 Excel
+            </button>
+            <button
+              onClick={() => setImportOpen(true)}
+              className="px-4 py-2 text-sm font-medium rounded-md border transition-all hover:opacity-90"
+              style={{
+                background: "var(--t-bg-card)",
+                color: "var(--t-text)",
+                borderColor: "var(--t-border)",
+              }}
+            >
+              📤 导入 Excel（替换线上数据）
+            </button>
+          </div>
         </div>
       </header>
 
@@ -409,6 +423,19 @@ export default function AdminQuotesPage() {
             pushToast("success", "已删除");
           }}
           onError={(msg) => pushToast("error", msg)}
+        />
+      )}
+
+      {importOpen && (
+        <ImportModal
+          onClose={() => setImportOpen(false)}
+          onExport={handleExport}
+          onImported={(message) => {
+            setImportOpen(false);
+            loadMasters();
+            loadQuotes(1);
+            pushToast("success", message);
+          }}
         />
       )}
 
@@ -963,6 +990,314 @@ function ConfirmDeleteModal({ quote, onClose, onDeleted, onError }: ConfirmDelet
             style={{ background: "#dc2626", color: "#fff" }}
           >
             {deleting ? "删除中…" : "确认删除"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface ImportReportView {
+  totalRows: number;
+  errors: Array<{ row: number; message: string }>;
+  warnings: string[];
+  detectedColumns: string[];
+  missingOptionalColumns: string[];
+  newMasters: string[];
+  sample: Array<{ content_cn: string; master_name_cn: string }>;
+  currentCount: number;
+}
+
+interface ImportModalProps {
+  onClose: () => void;
+  onExport: () => void;
+  onImported: (message: string) => void;
+}
+
+const MAX_IMPORT_FILE_BYTES = 20 * 1024 * 1024;
+
+function ImportModal({ onClose, onExport, onImported }: ImportModalProps) {
+  const [file, setFile] = useState<File | null>(null);
+  const [report, setReport] = useState<ImportReportView | null>(null);
+  const [checking, setChecking] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
+  const [fatal, setFatal] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape" && !submitting) onClose();
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [onClose, submitting]);
+
+  const checkFile = async (picked: File) => {
+    setChecking(true);
+    setReport(null);
+    setFatal(null);
+    setConfirmed(false);
+    try {
+      const res = await fetch(withBasePath("/api/admin/quotes/import?dryRun=1"), {
+        method: "POST",
+        headers: { "Content-Type": "application/octet-stream" },
+        body: picked,
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        report?: ImportReportView;
+      };
+      if (data.report) setReport(data.report);
+      if (data.error) setFatal(data.error);
+      else if (!res.ok) setFatal(`校验失败 (${res.status})`);
+    } catch (err) {
+      setFatal(`校验失败：${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const picked = e.target.files?.[0] ?? null;
+    setFile(picked);
+    setReport(null);
+    setFatal(null);
+    setConfirmed(false);
+    if (!picked) return;
+    if (!picked.name.toLowerCase().endsWith(".xlsx")) {
+      setFatal("仅支持 .xlsx 文件；.xls / .csv 请先另存为 .xlsx");
+      return;
+    }
+    if (picked.size > MAX_IMPORT_FILE_BYTES) {
+      setFatal("文件过大，上限 20MB");
+      return;
+    }
+    void checkFile(picked);
+  };
+
+  const canSubmit =
+    !!file &&
+    !!report &&
+    !checking &&
+    !submitting &&
+    !fatal &&
+    report.errors.length === 0 &&
+    confirmed;
+
+  const handleSubmit = async () => {
+    if (!canSubmit || !file || !report) return;
+    setSubmitting(true);
+    setFatal(null);
+    try {
+      const res = await fetch(withBasePath("/api/admin/quotes/import"), {
+        method: "POST",
+        headers: { "Content-Type": "application/octet-stream" },
+        body: file,
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        result?: { quotes: number };
+      };
+      if (!res.ok) {
+        setFatal(data.error || `导入失败 (${res.status})`);
+        return;
+      }
+      onImported(
+        `导入完成：线上数据已替换为 ${data.result?.quotes ?? report.totalRows} 条名言`,
+      );
+    } catch (err) {
+      setFatal(`导入失败：${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0, 0, 0, 0.5)" }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !submitting) onClose();
+      }}
+    >
+      <div
+        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto border"
+        style={{
+          background: "var(--t-bg-card)",
+          borderColor: "var(--t-border)",
+          borderRadius: "var(--t-radius)",
+        }}
+        role="dialog"
+        aria-modal="true"
+      >
+        <div
+          className="px-6 py-4 border-b flex items-center justify-between"
+          style={{ borderColor: "var(--t-border)" }}
+        >
+          <h2 className="text-lg font-bold" style={{ color: "var(--t-text)" }}>
+            导入 Excel · 替换线上数据
+          </h2>
+          <button
+            onClick={onClose}
+            disabled={submitting}
+            className="text-2xl leading-none transition-opacity hover:opacity-70 disabled:opacity-40"
+            style={{ color: "var(--t-text-muted)" }}
+            aria-label="关闭"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="p-6 space-y-4">
+          <p className="text-sm" style={{ color: "var(--t-text-secondary)" }}>
+            上传 .xlsx 文件，用其中的名言数据整体替换线上数据。建议使用「一键导出 Excel」生成的文件修改后回传，
+            表头需包含「中文内容」和「大师（中文）」两列，其余列可选。
+          </p>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <input
+              ref={inputRef}
+              type="file"
+              accept=".xlsx"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              disabled={checking || submitting}
+              className="px-4 py-2 text-sm font-medium rounded-md transition-all hover:opacity-90 disabled:opacity-50"
+              style={{ background: "var(--t-accent)", color: "var(--t-bg)" }}
+            >
+              {file ? "重新选择文件" : "选择 .xlsx 文件"}
+            </button>
+            {file && (
+              <span className="text-xs" style={{ color: "var(--t-text-muted)" }}>
+                {file.name} · {(file.size / 1024).toFixed(0)} KB
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={onExport}
+              className="px-3 py-2 text-xs rounded-md border transition-all hover:opacity-80"
+              style={{
+                background: "var(--t-bg-tag)",
+                color: "var(--t-text)",
+                borderColor: "var(--t-border)",
+              }}
+            >
+              ↓ 先下载当前数据备份
+            </button>
+          </div>
+
+          {checking && (
+            <p className="text-sm" style={{ color: "var(--t-text-muted)" }}>
+              正在校验文件内容…
+            </p>
+          )}
+
+          {fatal && (
+            <div
+              className="p-3 rounded-md text-sm"
+              style={{ background: "#fee2e2", color: "#b91c1c" }}
+            >
+              {fatal}
+            </div>
+          )}
+
+          {report && (
+            <div className="space-y-3">
+              {report.errors.length === 0 ? (
+                <div
+                  className="p-3 rounded-md text-sm"
+                  style={{ background: "var(--t-bg-tag)", color: "var(--t-text)" }}
+                >
+                  ✓ 校验通过：共解析到 <strong>{report.totalRows}</strong> 条名言，
+                  当前线上 <strong>{report.currentCount}</strong> 条。
+                </div>
+              ) : (
+                <div
+                  className="p-3 rounded-md text-sm space-y-1"
+                  style={{ background: "#fee2e2", color: "#b91c1c" }}
+                >
+                  <p className="font-semibold">发现 {report.errors.length} 处问题（前 20 条）：</p>
+                  {report.errors.map((err, i) => (
+                    <p key={i} className="text-xs">
+                      第 {err.row} 行：{err.message}
+                    </p>
+                  ))}
+                </div>
+              )}
+
+              <div
+                className="p-3 rounded-md text-sm space-y-1"
+                style={{ background: "var(--t-bg-tag)", color: "var(--t-text-secondary)" }}
+              >
+                {report.warnings.map((w, i) => (
+                  <p key={i}>• {w}</p>
+                ))}
+              </div>
+
+              <p className="text-xs" style={{ color: "var(--t-text-muted)" }}>
+                识别到的列：{report.detectedColumns.join("、") || "无"}
+              </p>
+
+              {report.sample.length > 0 && (
+                <div className="space-y-1">
+                  <p className="text-xs" style={{ color: "var(--t-text-muted)" }}>
+                    数据预览（前 {report.sample.length} 条）：
+                  </p>
+                  {report.sample.map((s, i) => (
+                    <p
+                      key={i}
+                      className="text-xs line-clamp-1"
+                      style={{ color: "var(--t-text-secondary)" }}
+                    >
+                      {s.content_cn} — {s.master_name_cn}
+                    </p>
+                  ))}
+                </div>
+              )}
+
+              {report.errors.length === 0 && (
+                <label className="flex items-start gap-2 text-sm cursor-pointer pt-1">
+                  <input
+                    type="checkbox"
+                    checked={confirmed}
+                    onChange={(e) => setConfirmed(e.target.checked)}
+                    className="w-4 h-4 mt-0.5 cursor-pointer"
+                  />
+                  <span style={{ color: "var(--t-text)" }}>
+                    我已备份并确认：清空现有 {report.currentCount} 条名言，替换为文件中的 {report.totalRows} 条数据，操作不可撤销
+                  </span>
+                </label>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div
+          className="flex items-center justify-end gap-2 px-6 py-3 border-t"
+          style={{ borderColor: "var(--t-border)" }}
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={submitting}
+            className="px-4 py-2 text-sm font-medium rounded-md transition-colors disabled:opacity-50"
+            style={{ background: "var(--t-bg-tag)", color: "var(--t-text)" }}
+          >
+            取消
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={!canSubmit}
+            className="px-4 py-2 text-sm font-medium rounded-md transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ background: "#dc2626", color: "#fff" }}
+          >
+            {submitting ? "正在替换…" : "确认替换线上数据"}
           </button>
         </div>
       </div>
