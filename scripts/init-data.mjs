@@ -74,6 +74,16 @@ CREATE TABLE IF NOT EXISTS quote_interpretations (
 `;
 db.exec(createTablesSQL);
 
+// 已有数据的生产库不再执行任何种子写入。
+// 该脚本每次容器启动都会运行，若继续 INSERT OR IGNORE / INSERT OR REPLACE，
+// 会重新插回已被删除或导入替换的名言、覆盖后台编辑过的解读和头像。
+const existingQuoteCount = db.prepare('SELECT COUNT(*) c FROM quotes').get().c;
+if (existingQuoteCount > 0) {
+  console.log(`[init-data] quotes already has ${existingQuoteCount} rows, skip seeding.`);
+  db.close();
+  process.exit(0);
+}
+
 // Insert masters if not exist
 const insertMastersSQL = `
 INSERT OR IGNORE INTO masters (id, name_cn, name_en, avatar_url, title, bio, born_year, nationality, category) VALUES
