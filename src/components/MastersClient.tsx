@@ -25,8 +25,12 @@ export function MastersClient({ masters }: { masters: Master[] }) {
   }, [masters, search]);
 
   const grouped = useMemo(() => {
+    const CATEGORY_LABELS: Record<string, string> = {
+      "user-submitted": "社区贡献",
+      imported: "导入大师",
+    };
     return filtered.reduce((acc, m) => {
-      const cat = m.category || "其他";
+      const cat = CATEGORY_LABELS[m.category] || m.category || "其他";
       if (!acc[cat]) acc[cat] = [];
       acc[cat].push(m);
       return acc;
