@@ -195,14 +195,20 @@ function buildColumnMap(ws: ExcelJS.Worksheet, headerRow: number): Partial<Recor
   return map;
 }
 
-function parseYear(raw: string): { value: number | null; valid: boolean } {
+/**
+ * 年份列不做任何格式或范围限制：能解析成数字就保留，
+ * 解析不了（如「—」「未知」「2025年」中的杂字符）就当作没有，前端自然不展示。
+ */
+function parseYear(raw: string): number | null {
   const s = raw.trim();
-  if (!s) return { value: null, valid: true };
+  if (!s) return null;
   const n = Number(s);
-  if (!Number.isFinite(n) || n < 0 || n > 9999) {
-    return { value: null, valid: false };
+  if (Number.isFinite(n)) {
+    const value = Math.trunc(n);
+    return Number.isSafeInteger(value) ? value : null;
   }
-  return { value: Math.trunc(n), valid: true };
+  const matched = s.match(/\d{4}/);
+  return matched ? Number(matched[0]) : null;
 }
 
 function parseTags(raw: string): string[] {
@@ -359,7 +365,6 @@ export async function parseWorkbook(data: ArrayBuffer): Promise<ParsedWorkbook> 
     }
 
     const year = parseYear(get(row, "source_year"));
-    if (!year.valid) errors.push({ row: r, message: "「年份」必须是 0-9999 的数字" });
 
     const rawId = get(row, "id").trim();
     let id = rawId;
@@ -397,7 +402,7 @@ export async function parseWorkbook(data: ArrayBuffer): Promise<ParsedWorkbook> 
       master_name_cn: masterNameCn,
       master_name_en: get(row, "master_name_en").trim() || null,
       source: source || null,
-      source_year: year.value,
+      source_year: year,
       is_featured: parseFeatured(get(row, "is_featured")),
       favorite_count: parseFavoriteCount(get(row, "favorite_count")),
       created_at: parseCreatedAt(get(row, "created_at"), fallbackIso),
