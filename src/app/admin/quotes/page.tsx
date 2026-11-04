@@ -1162,9 +1162,10 @@ function AvatarEditorModal({ onClose, onToast }: AvatarEditorModalProps) {
   const keyword = query.trim().toLowerCase();
   const filtered = masters.filter(
     (m) =>
-      !keyword ||
-      m.name_cn.toLowerCase().includes(keyword) ||
-      (m.name_en ?? "").toLowerCase().includes(keyword),
+      m.quote_count > 0 &&
+      (!keyword ||
+        m.name_cn.toLowerCase().includes(keyword) ||
+        (m.name_en ?? "").toLowerCase().includes(keyword)),
   );
 
   return (
@@ -1205,7 +1206,7 @@ function AvatarEditorModal({ onClose, onToast }: AvatarEditorModalProps) {
         <div className="p-6 space-y-4">
           <p className="text-sm" style={{ color: "var(--t-text-secondary)" }}>
             为大师添加或更换头像。图片保存在服务器数据目录，容器重启或重新部署后依然保留；
-            支持 PNG / JPG / WebP / GIF，单张不超过 2MB。
+            支持 PNG / JPG / WebP / GIF，单张不超过 2MB。仅列出已有名言的大师。
           </p>
 
           <input
