@@ -1355,7 +1355,9 @@ function ImportModal({ onClose, onExport, onImported }: ImportModalProps) {
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [fatal, setFatal] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dragDepthRef = useRef(0);
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
@@ -1390,8 +1392,7 @@ function ImportModal({ onClose, onExport, onImported }: ImportModalProps) {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const picked = e.target.files?.[0] ?? null;
+  const acceptFile = (picked: File | null) => {
     setFile(picked);
     setReport(null);
     setFatal(null);
@@ -1406,6 +1407,36 @@ function ImportModal({ onClose, onExport, onImported }: ImportModalProps) {
       return;
     }
     void checkFile(picked);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    acceptFile(e.target.files?.[0] ?? null);
+    e.target.value = "";
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    dragDepthRef.current += 1;
+    if (Array.from(e.dataTransfer.types).includes("Files")) setDragging(true);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
+    if (dragDepthRef.current === 0) setDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    dragDepthRef.current = 0;
+    setDragging(false);
+    if (checking || submitting) return;
+    acceptFile(e.dataTransfer.files?.[0] ?? null);
   };
 
   const canSubmit =
@@ -1452,6 +1483,10 @@ function ImportModal({ onClose, onExport, onImported }: ImportModalProps) {
       onClick={(e) => {
         if (e.target === e.currentTarget && !submitting) onClose();
       }}
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
     >
       <div
         className="w-full max-w-2xl max-h-[90vh] overflow-y-auto border"
@@ -1487,40 +1522,59 @@ function ImportModal({ onClose, onExport, onImported }: ImportModalProps) {
             表头需包含「中文内容」和「大师（中文）」两列，其余列可选。
           </p>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <input
-              ref={inputRef}
-              type="file"
-              accept=".xlsx"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-            <button
-              type="button"
-              onClick={() => inputRef.current?.click()}
-              disabled={checking || submitting}
-              className="px-4 py-2 text-sm font-medium rounded-md transition-all hover:opacity-90 disabled:opacity-50"
-              style={{ background: "var(--t-accent)", color: "var(--t-bg)" }}
+          <div
+            className="rounded-lg border-2 border-dashed p-5 text-center transition-colors"
+            style={{
+              borderColor: dragging ? "var(--t-accent)" : "var(--t-border)",
+              background: dragging ? "var(--t-bg-tag)" : "transparent",
+            }}
+          >
+            <p
+              className="text-sm mb-3"
+              style={{ color: "var(--t-text-secondary)" }}
             >
-              {file ? "重新选择文件" : "选择 .xlsx 文件"}
-            </button>
+              {dragging
+                ? "松开鼠标即可上传"
+                : "把 .xlsx 文件拖到这里，或点击下方按钮选择"}
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <input
+                ref={inputRef}
+                type="file"
+                accept=".xlsx"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                disabled={checking || submitting}
+                className="px-4 py-2 text-sm font-medium rounded-md transition-all hover:opacity-90 disabled:opacity-50"
+                style={{ background: "var(--t-accent)", color: "var(--t-bg)" }}
+              >
+                {file ? "重新选择文件" : "选择 .xlsx 文件"}
+              </button>
+              <button
+                type="button"
+                onClick={onExport}
+                className="px-3 py-2 text-xs rounded-md border transition-all hover:opacity-80"
+                style={{
+                  background: "var(--t-bg-tag)",
+                  color: "var(--t-text)",
+                  borderColor: "var(--t-border)",
+                }}
+              >
+                ↓ 先下载当前数据备份
+              </button>
+            </div>
             {file && (
-              <span className="text-xs" style={{ color: "var(--t-text-muted)" }}>
-                {file.name} · {(file.size / 1024).toFixed(0)} KB
-              </span>
+              <p
+                className="text-xs mt-3"
+                style={{ color: "var(--t-text-muted)" }}
+              >
+                已选择：{file.name} · {(file.size / 1024).toFixed(0)} KB
+              </p>
             )}
-            <button
-              type="button"
-              onClick={onExport}
-              className="px-3 py-2 text-xs rounded-md border transition-all hover:opacity-80"
-              style={{
-                background: "var(--t-bg-tag)",
-                color: "var(--t-text)",
-                borderColor: "var(--t-border)",
-              }}
-            >
-              ↓ 先下载当前数据备份
-            </button>
           </div>
 
           {checking && (
