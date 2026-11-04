@@ -30,7 +30,6 @@ export function QuotesClient({
   // ── 名言搜索 ──
   const [quotes, setQuotes] = useState(initialQuotes);
   const [search, setSearch] = useState("");
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [searching, setSearching] = useState(false);
 
   const doSearch = useCallback(async (keyword: string) => {
@@ -47,15 +46,13 @@ export function QuotesClient({
     return () => clearTimeout(timer);
   }, [search, doSearch]);
 
-  const filteredQuotes = selectedTag ? quotes.filter((q) => q.tags?.some((t) => t.id === selectedTag)) : quotes;
-
   // ── 分页 ──
   const PAGE_SIZE = 12;
   const [page, setPage] = useState(1);
-  useEffect(() => { setPage(1); }, [search, selectedTag, quotes]);
-  const totalPages = Math.max(1, Math.ceil(filteredQuotes.length / PAGE_SIZE));
+  useEffect(() => { setPage(1); }, [search, quotes]);
+  const totalPages = Math.max(1, Math.ceil(quotes.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
-  const pagedQuotes = filteredQuotes.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const pagedQuotes = quotes.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const pageNumbers = useMemo(() => {
     const pages: (number | "…")[] = [];
@@ -157,30 +154,7 @@ export function QuotesClient({
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2 mb-8">
-            <button
-              onClick={() => setSelectedTag(null)}
-              className="tag-pill transition-colors"
-              style={{ background: !selectedTag ? "var(--t-accent)" : "var(--t-bg-tag)", color: !selectedTag ? "var(--t-bg)" : "var(--t-tag-text)" }}
-            >
-              全部
-            </button>
-            {tags.map((tag) => (
-              <button
-                key={tag.id}
-                onClick={() => setSelectedTag(tag.id === selectedTag ? null : tag.id)}
-                className="tag-pill transition-colors"
-                style={{
-                  background: tag.id === selectedTag ? "var(--t-accent)" : "var(--t-bg-tag)",
-                  color: tag.id === selectedTag ? "var(--t-bg)" : "var(--t-tag-text)",
-                }}
-              >
-                {tag.name}
-              </button>
-            ))}
-          </div>
-
-          <p className="text-sm mb-6" style={{ color: "var(--t-text-muted)" }}>{filteredQuotes.length} 条名言</p>
+          <p className="text-sm mb-6" style={{ color: "var(--t-text-muted)" }}>{quotes.length} 条名言</p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {pagedQuotes.map((quote) => {
@@ -282,7 +256,7 @@ export function QuotesClient({
             </div>
           )}
 
-          {filteredQuotes.length === 0 && (
+          {quotes.length === 0 && (
             <div className="text-center py-16">
               <div className="text-4xl mb-4">🔍</div>
               <p className="text-lg" style={{ color: "var(--t-text-secondary)" }}>没有找到匹配的名言</p>
